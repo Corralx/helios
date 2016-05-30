@@ -129,6 +129,7 @@ int main(int, char*[])
 		glDeleteShader(raymarch_shader);
 
 		uniforms = extract_uniform(scene_source, raymarch_program);
+		extract_uniform(rpi.base_source + rpi.library_source + scene_source + rpi.main_source);
 	}
 	assert(raymarch_program != invalid_handle);
 

@@ -65,6 +65,7 @@ include_directories (${CPPFORMAT_INCLUDE_PATH})
 include_directories (${IMGUI_INCLUDE_PATH})
 include_directories (${SDL2_INCLUDE_PATH})
 include_directories (${RAPIDJSON_INCLUDE_PATH})
+include_directories (${GLSLANG_INCLUDE_PATH})
 
 add_executable (
 	helios
@@ -87,6 +88,10 @@ target_link_libraries (
 	helios
 	cppformat
 	imgui
+	HLSL
+	OGLCompiler
+	OSDependent
+	glslang
 	${OPENGL_LIB}
 	${SDL2_LIB_PATH}/SDL2.lib
 	${SDL2_LIB_PATH}/SDL2main.lib

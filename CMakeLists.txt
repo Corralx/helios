@@ -12,6 +12,7 @@ set (TCLAP_PATH ${CMAKE_SOURCE_DIR}/external/tclap)
 set (CPPFORMAT_PATH ${CMAKE_SOURCE_DIR}/external/cppformat)
 set (IMGUI_PATH ${CMAKE_SOURCE_DIR}/external/imgui)
 set (RAPIDJSON_PATH ${CMAKE_SOURCE_DIR}/external/rapidjson)
+set (GLSLANG_PATH ${CMAKE_SOURCE_DIR}/external/glslang/)
 
 set (
 	GL3W_INCLUDE_PATH
@@ -43,7 +44,13 @@ set (
 	${RAPIDJSON_PATH}
 )
 
+set (
+	GLSLANG_INCLUDE_PATH
+	${GLSLANG_PATH}/glslang/glslang/Public
+)
+
 add_subdirectory (${GL3W_PATH})
 add_subdirectory (${CPPFORMAT_PATH})
 add_subdirectory (${IMGUI_PATH})
+add_subdirectory (${GLSLANG_PATH})
 add_subdirectory (helios)

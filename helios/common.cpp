@@ -178,3 +178,54 @@ void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, G
 	cout << "---------------------opengl-callback-end--------------" << endl;
 }
 #endif
+
+#include "ShaderLang.h"
+
+using namespace glslang;
+
+struct glslang_raii
+{
+	glslang_raii() { InitializeProcess(); }
+	~glslang_raii() { FinalizeProcess(); }
+};
+
+void extract_uniform(const std::string& source)
+{
+	static glslang_raii glslang_raii{};
+
+	TShader* shader = new TShader(EShLangCompute);
+
+	auto source_ptr = source.c_str();
+	shader->setStrings(&source_ptr, 1);
+
+	if (!shader->parse(&DefaultTBuiltInResource, 430, false, EShMsgDefault))
+	{
+		std::cout << "Error compiling scene: " << std::endl;
+		std::cout << shader->getInfoLog() << std::endl;
+		std::cout << shader->getInfoDebugLog() << std::endl;
+
+		delete shader;
+		return;
+	}
+
+	TProgram* program = new TProgram();
+	program->addShader(shader);
+	if (!program->link(EShMsgDefault))
+	{
+		std::cout << "Error linking program: " << std::endl;
+		std::cout << program->getInfoLog() << std::endl;
+		std::cout << program->getInfoDebugLog() << std::endl;
+
+		delete program;
+		delete shader;
+		return;
+	}
+
+	program->buildReflection();
+	int32_t num_uniforms = program->getNumLiveUniformVariables();
+	for (int32_t i = 0; i < num_uniforms; ++i)
+		std::cout << "Name: " << program->getUniformName(i) << "   Type: " << program->getUniformType(i) << std::endl;
+
+	delete program;
+	delete shader;
+}

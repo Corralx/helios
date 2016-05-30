@@ -1,0 +1,21 @@
+#version 430 core
+
+layout (binding = 0, rgba32f) writeonly uniform image2D output_image;
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+float epsilon = 0.001f;
+float z_far = 20.0;
+
+layout(location = 1014) uniform float time;
+
+layout(location = 1015) uniform vec3 light_direction;
+layout(location = 1016) uniform vec3 light_color;
+
+layout(location = 1017) uniform vec3 camera_position;
+layout(location = 1018) uniform vec3 camera_view;
+layout(location = 1019) uniform vec3 camera_up;
+layout(location = 1020) uniform vec3 camera_right;
+layout(location = 1021) uniform float focal_length;
+
+layout(location = 1022) uniform uint screen_width;
+layout(location = 1023) uniform uint screen_height;

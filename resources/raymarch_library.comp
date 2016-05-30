@@ -1,0 +1,150 @@
+// Distance functions: https://www.shadertoy.com/view/Xds3zN
+float length_n(in vec3 point, in int n)
+{
+	float t = pow(point.x, n) + pow(point.y, n) + pow(point.z, n);
+	return pow(t, 1.0 / n);
+}
+
+float length8(in vec3 point)
+{
+	vec3 p = point * point;
+	p = p * p;
+	p = p * p;
+	return pow(p.x + p.y + p.z, 1.0 / 8);
+}
+
+float length_n(in vec2 point, in int n)
+{
+	float t = pow(point.x, n) + pow(point.y, n);
+	return pow(t, 1.0 / n);
+}
+
+float length8(in vec2 point)
+{
+	vec2 p = point * point;
+	p = p * p;
+	p = p * p;
+	return pow(p.x + p.y, 1.0 / 8);
+}
+
+float sd_sphere(in vec3 point, in float radius)
+{
+	return length(point) - radius;
+}
+
+float ud_box(in vec3 point, in vec3 box)
+{
+	return length(max(abs(point) - box, 0.0));
+}
+
+float sd_box(in vec3 point, in vec3 box)
+{
+	vec3 d = abs(point) - box;
+	return min(max(d.x, max(d.y, d.z)), 0.0) +
+		   length(max(d, 0.0));
+}
+
+float ud_round_box(in vec3 point, in vec3 box, in float radius)
+{
+	return length(max(abs(point) - box, 0.0)) - radius;
+}
+
+float sd_torus(in vec3 point, in vec2 radius)
+{
+	vec2 q = vec2(length(point.xz) - radius.x, point.y);
+	return length(q) - radius.y;
+}
+
+float sd_cylinder(in vec3 point, in vec3 c)
+{
+	return length(point.xz - c.xy) - c.z;
+}
+
+float sd_cone(in vec3 point, in vec2 c)
+{
+    // c must be normalized
+    float q = length(point.xy);
+    return dot(c, vec2(q, point.z));
+}
+
+float sd_plane(in vec3 point, in vec4 n)
+{
+  // n must be normalized
+  return dot(point, n.xyz) + n.w;
+}
+
+float sd_plane_simple(in vec3 point)
+{
+	return point.y;
+}
+
+float sd_hexagonal_prism(in vec3 point, in vec2 h)
+{
+    vec3 q = abs(point);
+    return max(q.z - h.y, max((q.x * 0.866025 + q.y * 0.5), q.y) - h.x);
+}
+
+float sd_triangular_prism(in vec3 point, in vec2 h)
+{
+    vec3 q = abs(point);
+    return max(q.z - h.y, max(q.x * 0.866025 + point.y * 0.5, -point.y) - h.x * 0.5);
+}
+
+float sd_capsule(in vec3 point, in vec3 a, in vec3 b, in float r)
+{
+    vec3 pa = point - a;
+	vec3 ba = b - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    return length(pa - ba * h) - r;
+}
+
+float sd_capped_cylinder(in vec3 point, in vec2 h)
+{
+	vec2 d = abs(vec2(length(point.xz), point.y)) - h;
+	return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
+}
+
+float sd_torus82(in vec3 point, in vec2 t)
+{
+	vec2 q = vec2(length(point.xz) - t.x, point.y);
+	return length8(q) - t.y;
+}
+
+float sd_torus88(in vec3 point, in vec2 t)
+{
+	vec2 q = vec2(length8(point.xz) - t.x, point.y);
+	return length8(q) - t.y;
+}
+
+float sd_torus_nm(in vec3 point, in vec2 t, in int n, in int m)
+{
+	vec2 q = vec2(length_n(point.xz, n) - t.x, point.y);
+	return length_n(q, m) - t.y;
+}
+
+float op_union(in float d1, in float d2)
+{
+	return min(d1, d2);
+}
+
+float op_subtraction(in float d1, in float d2)
+{
+    return max(-d1, d2);
+}
+
+float op_intersection(in float d1, in float d2 )
+{
+    return max(d1, d2);
+}
+
+vec3 op_repeate(in vec3 point, in vec3 c)
+{
+    return mod(point, c) - 0.5 * c;
+}
+
+// TODO: Smooth union: http://iquilezles.org/www/articles/smin/smin.htm
+float op_blend(in float d1, in float d2, in float k)
+{
+	float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+	return mix(d2, d1, h) - k * h * (1.0 - h);
+}

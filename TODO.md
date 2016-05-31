@@ -1,6 +1,5 @@
 * Move the configuration to the config.json file
 * Create a decent basic scene
-* Better shading
 * Provide a way to debug/visualize the raymarch process
 * Check and print for errors while recompiling the scene instead of exploding on an assert
 * Expose raymarch params through the GUI

@@ -27,6 +27,20 @@ float length8(in vec2 point)
 	return pow(p.x + p.y, 1.0 / 8);
 }
 
+vec3 rotate_y(vec3 v, float t)
+{
+	float cost = cos(t);
+	float sint = sin(t);
+	return vec3(v.x * cost + v.z * sint, v.y, -v.x * sint + v.z * cost);
+}
+
+vec3 rotate_x(vec3 v, float t)
+{
+	float cost = cos(t);
+	float sint = sin(t);
+	return vec3(v.x, v.y * cost - v.z * sint, v.y * sint + v.z * cost);
+}
+
 float sd_sphere(in vec3 point, in float radius)
 {
 	return length(point) - radius;
@@ -60,16 +74,16 @@ float sd_cylinder(in vec3 point, in vec3 c)
 	return length(point.xz - c.xy) - c.z;
 }
 
+// NOTE(Corralx): c must be normalized
 float sd_cone(in vec3 point, in vec2 c)
 {
-    // c must be normalized
     float q = length(point.xy);
     return dot(c, vec2(q, point.z));
 }
 
+// NOTE(Corralx): n must be normalized
 float sd_plane(in vec3 point, in vec4 n)
 {
-  // n must be normalized
   return dot(point, n.xyz) + n.w;
 }
 
@@ -142,7 +156,7 @@ vec3 op_repeate(in vec3 point, in vec3 c)
     return mod(point, c) - 0.5 * c;
 }
 
-// TODO: Smooth union: http://iquilezles.org/www/articles/smin/smin.htm
+// TODO(Corralx): Smooth union http://iquilezles.org/www/articles/smin/smin.htm
 float op_blend(in float d1, in float d2, in float k)
 {
 	float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);

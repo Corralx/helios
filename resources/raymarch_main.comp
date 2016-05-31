@@ -50,9 +50,11 @@ void shade(in vec3 p, in vec3 light_vector, out vec3 color)
 	float l_dot_n = max(dot(light_vector, n), 0.0);
 
 	color = light_color * l_dot_n;
+
 	#ifdef ENABLE_SHADOW
 	color *= shadow(p, light_vector, 128.0f) + 0.2f;
 	#endif
+
 	#ifdef ENABLE_AMBIENT_OCCLUSION
 	color *= 1.0f - ambient_occlusion(p, n);
 	#endif
@@ -80,7 +82,7 @@ void main()
 
     vec3 ray_dir = normalize(camera_view * focal_length + camera_right * u * aspect_ratio + camera_up * v);
 
-	vec3 p;
+	vec3 p = vec3(0.0);
 	vec3 color_out = vec3(0.0, 1.0, 0.0);
 
 	for (iterations = 0; iterations < max_iterations; ++iterations)

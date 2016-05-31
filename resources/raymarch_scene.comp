@@ -11,4 +11,3 @@ float scene(in vec3 point)
 #define ENABLE_SHADOW
 #define SOFT_SHADOW
 #define ENABLE_AMBIENT_OCCLUSION
-

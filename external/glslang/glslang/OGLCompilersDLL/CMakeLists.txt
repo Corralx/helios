@@ -1,3 +1,7 @@
+cmake_minimum_required (VERSION 3.0.2)
+
+project (OGLCompiler CXX)
+
 set(SRC InitializeDll.cpp InitializeDll.h)
 
 add_library(OGLCompiler STATIC ${SRC})

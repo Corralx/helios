@@ -1,3 +1,7 @@
+cmake_minimum_required (VERSION 3.0.2)
+
+project (HLSL CXX)
+
 set(SRC
     hlslParseHelper.cpp
     hlslScanContext.cpp

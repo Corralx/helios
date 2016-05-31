@@ -1,3 +1,7 @@
+cmake_minimum_required (VERSION 3.0.2)
+
+project (OSDependent CXX)
+
 set(SRC ossource.cpp ../osinclude.h)
 
 add_library(OSDependent STATIC ${SRC})

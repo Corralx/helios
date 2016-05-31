@@ -2,8 +2,7 @@ cmake_minimum_required (VERSION 3.0.2)
 
 project (glslang CXX)
 
-set(INDEPENDENT_SRC
-    MachineIndependent/glslang.y
+set(SRC
     MachineIndependent/glslang_tab.cpp
     MachineIndependent/Constant.cpp
     MachineIndependent/InfoSink.cpp

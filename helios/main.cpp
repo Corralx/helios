@@ -225,6 +225,9 @@ int main(int, char*[])
 	light.direction = { -1.f, -1.f, -1.f };
 	light.color = { 1.f, 1.f, 1.f };
 
+	float vignette_radius = .9f;
+	float vignette_smoothness = .07f;
+
 	imgui_init(sdl_window);
 	float gui_space = 10.f;
 
@@ -323,6 +326,8 @@ int main(int, char*[])
 		glUseProgram(copy_program);
 		glUniform1ui(0, WINDOW_WIDTH);
 		glUniform1ui(1, WINDOW_HEIGHT);
+		glUniform1f(2, vignette_radius);
+		glUniform1f(3, vignette_smoothness);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 		/* ImGui */
@@ -368,13 +373,17 @@ int main(int, char*[])
 
 			if (ImGui::CollapsingHeader("Scene settings"))
 			{
-				ImGui::Text("Camera settings");
+				ImGui::Text("Postprocessing");
+				ImGui::SliderFloat("Vignette radius", &vignette_radius, .5f, 1.f);
+				ImGui::SliderFloat("Vignette smoothness", &vignette_smoothness, .0f, .5f);
+
+				ImGui::Text("Camera");
 				ImGui::SliderFloat("Focal length", &camera.focal_length, 1.f, 5.f);
 				ImGui::InputFloat3("Position", glm::value_ptr(camera.position));
 				ImGui::InputFloat3("View", glm::value_ptr(camera.view));
 				ImGui::Spacing(gui_space);
 
-				ImGui::Text("Light settings");
+				ImGui::Text("Light");
 				ImGui::SliderFloat3("Direction", glm::value_ptr(light.direction), -1.f, 1.f);
 				ImGui::SliderFloat3("Color", glm::value_ptr(light.color), 0.f, 1.f);
 				ImGui::Spacing(gui_space);

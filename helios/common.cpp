@@ -34,16 +34,7 @@ uint32_t compile_shader(const std::string& source, shader_type type)
 	int32_t success;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success)
-	{
-		int maxLength = 0;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
-		std::cout << &errorLog[0] << std::endl;
-
 		return invalid_handle;
-	}
 	
 	return shader;
 }
@@ -64,60 +55,6 @@ uint32_t link_program(std::initializer_list<uint32_t> shaders)
 
 	return program;
 }
-
-#ifdef _DEBUG
-void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userParam)
-{
-	userParam;
-	length;
-	source;
-
-	using namespace std;
-
-	cout << "---------------------opengl-callback-start------------" << endl;
-	cout << "message: " << message << endl;
-	cout << "type: ";
-	switch (type)
-	{
-		case GL_DEBUG_TYPE_ERROR:
-			cout << "ERROR";
-			break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-			cout << "DEPRECATED_BEHAVIOR";
-			break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-			cout << "UNDEFINED_BEHAVIOR";
-			break;
-		case GL_DEBUG_TYPE_PORTABILITY:
-			cout << "PORTABILITY";
-			break;
-		case GL_DEBUG_TYPE_PERFORMANCE:
-			cout << "PERFORMANCE";
-			break;
-		case GL_DEBUG_TYPE_OTHER:
-			cout << "OTHER";
-			break;
-	}
-	cout << endl;
-
-	cout << "id: " << id << endl;
-	cout << "severity: ";
-	switch (severity)
-	{
-		case GL_DEBUG_SEVERITY_LOW:
-			cout << "LOW";
-			break;
-		case GL_DEBUG_SEVERITY_MEDIUM:
-			cout << "MEDIUM";
-			break;
-		case GL_DEBUG_SEVERITY_HIGH:
-			cout << "HIGH";
-			break;
-	}
-	cout << endl;
-	cout << "---------------------opengl-callback-end--------------" << endl;
-}
-#endif
 
 // TODO(Corralx): Find a better way to declare these, instead of hardcoding them
 static std::vector<std::string> default_uniforms =
@@ -220,3 +157,57 @@ std::vector<uniform_t> extract_uniform(const std::string& source)
 
 	return std::move(uniforms);
 }
+
+#ifdef _DEBUG
+void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userParam)
+{
+	userParam;
+	length;
+	source;
+
+	using namespace std;
+
+	cout << "---------------------opengl-callback-start------------" << endl;
+	cout << "message: " << message << endl;
+	cout << "type: ";
+	switch (type)
+	{
+		case GL_DEBUG_TYPE_ERROR:
+			cout << "ERROR";
+			break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+			cout << "DEPRECATED_BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+			cout << "UNDEFINED_BEHAVIOR";
+			break;
+		case GL_DEBUG_TYPE_PORTABILITY:
+			cout << "PORTABILITY";
+			break;
+		case GL_DEBUG_TYPE_PERFORMANCE:
+			cout << "PERFORMANCE";
+			break;
+		case GL_DEBUG_TYPE_OTHER:
+			cout << "OTHER";
+			break;
+	}
+	cout << endl;
+
+	cout << "id: " << id << endl;
+	cout << "severity: ";
+	switch (severity)
+	{
+		case GL_DEBUG_SEVERITY_LOW:
+			cout << "LOW";
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM:
+			cout << "MEDIUM";
+			break;
+		case GL_DEBUG_SEVERITY_HIGH:
+			cout << "HIGH";
+			break;
+	}
+	cout << endl;
+	cout << "---------------------opengl-callback-end--------------" << endl;
+}
+#endif

@@ -59,7 +59,7 @@ static void bind_uniforms(const std::vector<uniform_t>& uniforms);
 
 static constexpr uint32_t WINDOW_WIDTH = 1280;
 static constexpr uint32_t WINDOW_HEIGHT = 720;
-static constexpr char* WINDOW_NAME = "SDFVisualizer";
+static constexpr char* WINDOW_NAME = "Helios";
 static constexpr bool WINDOW_FULLSCREEN = false;
 static constexpr uint32_t OPENGL_MAJOR_VERSION = 4;
 static constexpr uint32_t OPENGL_MINOR_VERSION = 3;
@@ -108,6 +108,8 @@ int main(int, char*[])
 
 	assert(glGetError() == GL_NO_ERROR);
 
+	bool use_time;
+
 	/* Compile the programs*/
 	raymarch_program_info rpi{};
 	{
@@ -130,6 +132,8 @@ int main(int, char*[])
 
 		uniforms = extract_uniform(raymarch_source);
 		get_locations(uniforms, raymarch_program);
+
+		use_time = (glGetUniformLocation(raymarch_program, "time") != invalid_handle);
 	}
 	assert(raymarch_program != invalid_handle);
 
@@ -137,6 +141,7 @@ int main(int, char*[])
 	{
 		auto base_shader_source = get_content_of_file(fs::path(ASSETS_FOLDER) / "base_vertex.vert");
 		uint32_t base_shader = compile_shader(base_shader_source, shader_type::VERTEX);
+
 		auto copy_shader_source = get_content_of_file(fs::path(ASSETS_FOLDER) / "copy.frag");
 		uint32_t copy_shader = compile_shader(copy_shader_source, shader_type::FRAGMENT);
 		
@@ -151,7 +156,7 @@ int main(int, char*[])
 
 	/* Launch the file watcher in background to dynamically recompile the scene */
 	file_watcher fw(rpi.scene_path, shader_reload_interval,
-	[sdl_window, compiler_context, &swap_program, &compiled_program, &rpi, &uniforms]()
+	[sdl_window, compiler_context, &swap_program, &compiled_program, &rpi, &uniforms, &use_time]()
 	{
 		std::time_t current_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		std::cout << std::put_time(std::localtime(&current_time), "[%T]") << " Recompiling scene..." << std::endl;
@@ -167,6 +172,7 @@ int main(int, char*[])
 
 		uniforms = extract_uniform(compute_source);
 		get_locations(uniforms, compiled_program);
+		use_time = (glGetUniformLocation(compiled_program, "time") != invalid_handle);
 
 		swap_program = true;
 		assert(compiled_program != invalid_handle);
@@ -240,7 +246,9 @@ int main(int, char*[])
 
 		/* Dispatch the compute to generate the image */
 		glUseProgram(raymarch_program);
-		glUniform1f(1014, time_passed.count());
+		// If time is not used the uniform can be optmized away and cause a lot of INVALID_OPERATION
+		if (use_time)
+			glUniform1f(1014, time_passed.count());
 		glUniform3fv(1015, 1, glm::value_ptr(light.direction));
 		glUniform3fv(1016, 1, glm::value_ptr(light.color));
 		glUniform3fv(1017, 1, glm::value_ptr(camera.position));
@@ -340,6 +348,8 @@ static void get_locations(std::vector<uniform_t>& uniforms, uint32_t program)
 	for (auto& u : uniforms)
 	{
 		uint32_t loc = glGetUniformLocation(program, u.name.c_str());
+
+		// This should not happen because glslang optimize away the unused uniforms too
 		if (loc == invalid_handle)
 			std::cout << "Could not retrieve location for uniform \"" << u.name
 					  << "\" (Maybe it was optimized away?)" << std::endl;
@@ -371,6 +381,10 @@ static void generate_gui(std::vector<uniform_t>& uniforms)
 			case uniform_type::INT:
 			case uniform_type::UINT:
 				ImGui::InputInt(u.name.c_str(), &u.int4.x);
+				break;
+
+			case uniform_type::BOOL:
+				ImGui::Checkbox(u.name.c_str(), glm::value_ptr<bool>(u.bool4));
 				break;
 
 			default:
@@ -407,6 +421,10 @@ static void bind_uniforms(const std::vector<uniform_t>& uniforms)
 
 			case uniform_type::UINT:
 				glUniform1ui(u.location, static_cast<uint32_t>(u.int4.x));
+				break;
+
+			case uniform_type::BOOL:
+				glUniform1ui(u.location, static_cast<uint32_t>(u.bool4.x));
 				break;
 
 			default:

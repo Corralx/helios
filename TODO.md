@@ -4,3 +4,5 @@
 * Use GLSL subroutine to debug/visualize the raymarch process
 * Check and print for errors while recompiling the scene
 * Implement missing types when parsing uniforms
+* Expose raymarch params through the GUI
+* Don't reset params to 0 after every reload

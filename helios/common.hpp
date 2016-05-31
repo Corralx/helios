@@ -53,19 +53,22 @@ enum class uniform_type : uint8_t
 };
 
 // TODO(Corralx): Find a way to specify a default value?
+// Uniform initialization syntax seems to be bugged on a lot of implementations!
 struct uniform_t
 {
 	uniform_t(const std::string& n, uniform_type t) :
-		name(n), location(invalid_handle), type(t), float4(1.f) {}
+		name(n), location(invalid_handle), type(t), int4(0) {}
 
 	std::string name;
 	uint32_t location;
 	uniform_type type;
 
+	// NOTE(Corralx): ImGui does not support doubles or unsigned ints
 	union
 	{
 		glm::vec4 float4;
 		glm::ivec4 int4;
+		glm::bvec4 bool4;
 	};
 };
 
@@ -73,9 +76,9 @@ struct uniform_t
 uint32_t compile_shader(const std::string& source, shader_type type);
 uint32_t link_program(std::initializer_list<uint32_t> shaders);
 
+// NOTE(Corralx): After the call, the locations of the uniforms in the real compiled program is still to be retrieved
+std::vector<uniform_t> extract_uniform(const std::string& source);
+
 #ifdef _DEBUG
 void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userParam);
 #endif
-
-// NOTE(Corralx): After the call, the locations of the uniforms in the real compiled program is still to be retrieved
-std::vector<uniform_t> extract_uniform(const std::string& source);

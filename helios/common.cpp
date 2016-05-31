@@ -59,6 +59,20 @@ uint32_t link_program(std::initializer_list<uint32_t> shaders)
 // TODO(Corralx): Find a better way to declare these, instead of hardcoding them
 static std::vector<std::string> default_uniforms =
 {
+	"epsilon",
+	"z_far",
+	"normal_epsilon",
+	"starting_step",
+	"max_iterations",
+	"enable_shadow",
+	"soft_shadow",
+	"shadow_quality",
+	"shadow_epsilon",
+	"shadow_starting_step",
+	"shadow_max_step",
+	"enable_ambient_occlusion",
+	"ambient_occlusion_step",
+	"ambient_occlusion_iterations",
 	"screen_width",
 	"screen_height",
 	"light_direction",

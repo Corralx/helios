@@ -39,6 +39,29 @@ struct raymarch_program_info
 	std::string main_source;
 };
 
+struct raymarch_t
+{
+	/* Base */
+	float epsilon = .001f;
+	float z_far = 20.f;
+	float normal_epsilon = .0001f;
+	float starting_step = 1.f;
+	int32_t max_iterations = 150;
+
+	/* Shadows */
+	bool enable_shadow = true;
+	bool soft_shadow = true;
+	float shadow_quality = 64.f;
+	float shadow_epsilon = .001f;
+	float shadow_starting_step = .03f;
+	float shadow_max_step = 7.f;
+
+	/* Ambient Occlusion */
+	bool enable_ambient_occlusion = true;
+	float ambient_occlusion_step = .01f;
+	int32_t ambient_occlusion_iterations = 5;
+};
+
 struct camera_t
 {
 	glm::vec3 position;
@@ -188,20 +211,22 @@ int main(int, char*[])
 	});
 	fw.start();
 
-	/* Initialize the camera and a light */
+	/* Initialize the default uniforms */
+	raymarch_t raymarch_params{};
+
 	camera_t camera{};
 	camera.focal_length = 1.67f;
-	camera.position = { 0.0, 2.0, 5.0 };
-	camera.view = { 0.0, -0.5, -1.0 };
-	camera.up = { 0.0, 1.0, 0.0 };
-	camera.right = { 1.0, 0.0, 0.0 };
+	camera.position = { .0f, 2.f, 5.f };
+	camera.view = { .0f, -.5f, -1.f };
+	camera.up = { .0f, 1.f, .0f };
+	camera.right = { 1.f, .0f, .0f };
 
 	light_t light{};
-	light.direction = { -1.0, -1.0, -1.0 };
-	light.color = { 1.0, 1.0, 1.0 };
+	light.direction = { -1.f, -1.f, -1.f };
+	light.color = { 1.f, 1.f, 1.f };
 
 	imgui_init(sdl_window);
-	float gui_space = 10.0f;
+	float gui_space = 10.f;
 
 	/* Render loop */
 	bool should_quit = false;
@@ -211,10 +236,9 @@ int main(int, char*[])
 
 	compute_group_size group_size =
 	{
-		static_cast<uint32_t>(std::ceil(WINDOW_WIDTH / 32.0)),
-		static_cast<uint32_t>(std::ceil(WINDOW_HEIGHT / 32.0))
+		static_cast<uint32_t>(std::ceil(WINDOW_WIDTH / 32.f)),
+		static_cast<uint32_t>(std::ceil(WINDOW_HEIGHT / 32.f))
 	};
-
 
 	while (!should_quit)
 	{
@@ -253,11 +277,30 @@ int main(int, char*[])
 
 		/* Dispatch the compute to generate the image */
 		glUseProgram(raymarch_program);
+
+		// TODO(Corralx): an UBO should be used for performance here
+		/* Default uniforms */
+		glUniform1f(1000, raymarch_params.epsilon);
+		glUniform1f(1001, raymarch_params.z_far);
+		glUniform1f(1002, raymarch_params.normal_epsilon);
+		glUniform1f(1003, raymarch_params.starting_step);
+		glUniform1i(1004, raymarch_params.max_iterations);
+		glUniform1ui(1005, raymarch_params.enable_shadow);
+		glUniform1ui(1006, raymarch_params.soft_shadow);
+		glUniform1f(1007, raymarch_params.shadow_quality);
+		glUniform1f(1008, raymarch_params.shadow_epsilon);
+		glUniform1f(1009, raymarch_params.shadow_starting_step);
+		glUniform1f(1010, raymarch_params.shadow_max_step);
+		glUniform1i(1011, raymarch_params.enable_ambient_occlusion);
+		glUniform1f(1012, raymarch_params.ambient_occlusion_step);
+		glUniform1i(1013, raymarch_params.ambient_occlusion_iterations);
+		
 		if (use_time)
 		{
 			time_passed = std::chrono::duration_cast<std::chrono::duration<float>>(hr_clock::now() - start_time);
 			glUniform1f(1014, time_passed.count());
 		}
+
 		glUniform3fv(1015, 1, glm::value_ptr(light.direction));
 		glUniform3fv(1016, 1, glm::value_ptr(light.color));
 		glUniform3fv(1017, 1, glm::value_ptr(camera.position));
@@ -267,10 +310,13 @@ int main(int, char*[])
 		glUniform1f(1021, camera.focal_length);
 		glUniform1ui(1022, WINDOW_WIDTH);
 		glUniform1ui(1023, WINDOW_HEIGHT);
+
+		/* User uniforms */
 		bind_uniforms(uniforms);
+
 		glDispatchCompute(group_size.x, group_size.y, 1);
 
-		/* We make sure the compute has finished before copying the content */
+		/* Make sure the compute has finished before copying the content */
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		
 		/* Copy the content of the image onto the framebuffer */
@@ -284,6 +330,7 @@ int main(int, char*[])
 			ImGui::Text("Scene info");
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
+			/* Open the scene file with the default associated program */
 			if (ImGui::Button("Open Scene", ImVec2(120, 25)))
 			{
 #ifdef _WIN32
@@ -298,19 +345,40 @@ int main(int, char*[])
 				}
 #endif
 			}
-				
 			ImGui::Spacing(gui_space);
 
-			ImGui::Text("Camera settings");
-			ImGui::SliderFloat("Focal length", &camera.focal_length, 1.0f, 5.0f);
-			ImGui::SliderFloat3("Position", glm::value_ptr(camera.position), -10.0, 10.0);
-			ImGui::SliderFloat3("View", glm::value_ptr(camera.view), -10.0, 10.0);
-			ImGui::Spacing(gui_space);
-			
-			ImGui::Text("Light settings");
-			ImGui::SliderFloat3("Direction", glm::value_ptr(light.direction), -10.0, 10.0);
-			ImGui::SliderFloat3("Color", glm::value_ptr(light.color), 0.0, 1.0);
-			ImGui::Spacing(gui_space);
+			if (ImGui::CollapsingHeader("Raymarch settings"))
+			{
+				ImGui::InputFloat("Epsilon", &raymarch_params.epsilon, .0f, .0f, 4);
+				ImGui::InputFloat("Z Far", &raymarch_params.z_far, .0f, .0f, 2);
+				ImGui::InputFloat("Normal epsilon", &raymarch_params.normal_epsilon, .0f, .0f, 4);
+				ImGui::InputFloat("Starting step", &raymarch_params.starting_step, .0f, .0f, 3);
+				ImGui::InputInt("Max iterations", &raymarch_params.max_iterations);
+				ImGui::Checkbox("Enable shadow", &raymarch_params.enable_shadow);
+				ImGui::Checkbox("Soft Shadow", &raymarch_params.soft_shadow);
+				ImGui::InputFloat("Shadow quality", &raymarch_params.shadow_quality, .0f, .0f, 2);
+				ImGui::InputFloat("Shadow epsilon", &raymarch_params.shadow_epsilon, .0f, .0f, 4);
+				ImGui::InputFloat("Shadow starting step", &raymarch_params.shadow_starting_step, .0f, .0f, 3);
+				ImGui::InputFloat("Shadow max step", &raymarch_params.shadow_max_step, .0f, .0f, 3);
+				ImGui::Checkbox("Enable ambient occlusion", &raymarch_params.enable_ambient_occlusion);
+				ImGui::InputFloat("Ambient occlusion step", &raymarch_params.ambient_occlusion_step, .0f, .0f, 3);
+				ImGui::InputInt("Ambient occlusion iterations", &raymarch_params.ambient_occlusion_iterations);
+				ImGui::Spacing(gui_space);
+			}
+
+			if (ImGui::CollapsingHeader("Scene settings"))
+			{
+				ImGui::Text("Camera settings");
+				ImGui::SliderFloat("Focal length", &camera.focal_length, 1.f, 5.f);
+				ImGui::InputFloat3("Position", glm::value_ptr(camera.position));
+				ImGui::InputFloat3("View", glm::value_ptr(camera.view));
+				ImGui::Spacing(gui_space);
+
+				ImGui::Text("Light settings");
+				ImGui::SliderFloat3("Direction", glm::value_ptr(light.direction), -1.f, 1.f);
+				ImGui::SliderFloat3("Color", glm::value_ptr(light.color), 0.f, 1.f);
+				ImGui::Spacing(gui_space);
+			}
 
 			generate_gui(uniforms);
 		}
@@ -383,7 +451,8 @@ static void generate_gui(std::vector<uniform_t>& uniforms)
 	if (uniforms.empty())
 		return;
 
-	ImGui::Text("Custom variables");
+	if (!ImGui::CollapsingHeader("Custom uniforms"))
+		return;
 	
 	for (auto& u : uniforms)
 	{

@@ -53,7 +53,7 @@ enum class uniform_type : uint8_t
 };
 
 // TODO(Corralx): Find a way to specify a default value?
-// Uniform initialization syntax seems to be bugged on a lot of implementations!
+// Uniform initialization syntax seems to be bugged in a lot of implementations!
 struct uniform_t
 {
 	uniform_t(const std::string& n, uniform_type t) :
@@ -76,7 +76,7 @@ struct uniform_t
 uint32_t compile_shader(const std::string& source, shader_type type);
 uint32_t link_program(std::initializer_list<uint32_t> shaders);
 
-// NOTE(Corralx): After the call, the locations of the uniforms in the real compiled program is still to be retrieved
+// NOTE(Corralx): After the call, the locations of the uniforms in the real compiled program are still to be retrieved
 std::vector<uniform_t> extract_uniform(const std::string& source);
 
 #ifdef _DEBUG

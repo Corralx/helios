@@ -1,6 +1,6 @@
 void normal(in vec3 point, out vec3 normal)
 {
-	const vec3 v = vec3(0.0001f, 0, 0);
+	const vec3 v = vec3(normal_epsilon, 0, 0);
 
 	normal = normalize(vec3(
 		scene(point + v) - scene(point - v),
@@ -12,14 +12,16 @@ float shadow(in vec3 origin, in vec3 light_vector, in float k)
 {
 	float res = 1.0;
 
-    for (float t = 0.03f; t < 5.0f;)
+    for (float t = shadow_starting_step; t < shadow_max_step; )
     {
         float h = scene(origin + light_vector * t);
-        if (h < epsilon)
+
+        if (h < shadow_epsilon)
             return 0.0;
-#ifdef SOFT_SHADOW
-        res = min(res, k * h / t);
-#endif
+
+		if (soft_shadow)
+			res = min(res, k * h / t);
+
         t += h;
     }
 
@@ -28,14 +30,14 @@ float shadow(in vec3 origin, in vec3 light_vector, in float k)
 
 float ambient_occlusion(in vec3 point, in vec3 normal)
 {
-	float stepSize = 0.01f;
-	float t = stepSize;
+	float step_size = ambient_occlusion_step;
+	float t = step_size;
 	float oc = 0.0f;
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < ambient_occlusion_iterations; ++i)
 	{
 		float d = scene(point + normal * t);
 		oc += t - d;
-		t += stepSize;
+		t += step_size;
 	}
 
 	return clamp(oc, .0f, 1.f);
@@ -51,13 +53,13 @@ void shade(in vec3 p, in vec3 light_vector, out vec3 color)
 
 	color = light_color * l_dot_n;
 
-	#ifdef ENABLE_SHADOW
-	color *= shadow(p, light_vector, 128.0f) + 0.2f;
-	#endif
+	if (enable_shadow)
+		color *= shadow(p, light_vector, shadow_quality) + 0.2f;
 
-	#ifdef ENABLE_AMBIENT_OCCLUSION
-	color *= 1.0f - ambient_occlusion(p, n);
-	#endif
+	if (enable_ambient_occlusion)
+		color *= 1.0f - ambient_occlusion(p, n);
+
+	color = clamp(color, vec3(0.0), vec3(1.0));
 }
 
 void main()
@@ -73,8 +75,7 @@ void main()
 
 	vec3 light_vector = normalize(-light_direction);
 
-	float t = 1.0;
-    const int max_iterations = 200;
+	float t = starting_step;
 	int iterations;
 
 	float u = coord.x * 2.0 / screen_width_f - 1.0;

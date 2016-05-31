@@ -43,7 +43,7 @@ struct raymarch_t
 {
 	/* Base */
 	float epsilon = .001f;
-	float z_far = 20.f;
+	float z_far = 50.f;
 	float normal_epsilon = .0001f;
 	float starting_step = 1.f;
 	int32_t max_iterations = 150;

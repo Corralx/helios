@@ -80,5 +80,5 @@ uint32_t link_program(std::initializer_list<uint32_t> shaders);
 std::vector<uniform_t> extract_uniform(const std::string& source);
 
 #ifdef _DEBUG
-void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userParam);
+void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* user_param);
 #endif

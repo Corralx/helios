@@ -11,6 +11,8 @@ using hr_clock = std::chrono::high_resolution_clock;
 #ifdef _WIN32
 #include "Windows.h"
 #include "Shellapi.h"
+#else
+#include <unistd.h>
 #endif
 
 #include "glm/glm.hpp"
@@ -281,11 +283,22 @@ int main(int, char*[])
 		{
 			ImGui::Text("Scene info");
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-#ifdef _WIN32
-			/* Only on windows for now: we open the scene file with the default text editor */
+
 			if (ImGui::Button("Open Scene", ImVec2(120, 25)))
+			{
+#ifdef _WIN32
 				ShellExecuteW(0, 0, rpi.scene_path.c_str(), 0, 0, SW_SHOW);
+#else
+				// https://stackoverflow.com/questions/6143100/how-do-i-open-a-file-in-its-default-program-linux/6143139#6143139
+				auto pid = fork();
+				if (pid == 0)
+				{
+					execl("/usr/bin/xdg-open", "xdg-open", rpi.scene_path.c_str(), (char *)0);
+					exit(1);
+				}
 #endif
+			}
+				
 			ImGui::Spacing(gui_space);
 
 			ImGui::Text("Camera settings");

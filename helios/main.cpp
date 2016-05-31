@@ -224,7 +224,7 @@ int main(int, char*[])
 
 	light_t light{};
 	light.direction = { -1.f, -1.f, -1.f };
-	light.color = { 1.f, 1.f, 1.f };
+	light.color = { .8f, .8f, .8f };
 
 	float vignette_radius = .9f;
 	float vignette_smoothness = .07f;

@@ -374,13 +374,39 @@ static void generate_gui(std::vector<uniform_t>& uniforms)
 				ImGui::InputFloat(u.name.c_str(), glm::value_ptr<float>(u.float4));
 				break;
 
+			case uniform_type::VEC2:
+			case uniform_type::DVEC2:
+				ImGui::InputFloat2(u.name.c_str(), glm::value_ptr<float>(u.float4));
+				break;
+
 			case uniform_type::VEC3:
+			case uniform_type::DVEC3:
 				ImGui::InputFloat3(u.name.c_str(), glm::value_ptr<float>(u.float4));
+				break;
+
+			case uniform_type::VEC4:
+			case uniform_type::DVEC4:
+				ImGui::InputFloat4(u.name.c_str(), glm::value_ptr<float>(u.float4));
 				break;
 
 			case uniform_type::INT:
 			case uniform_type::UINT:
-				ImGui::InputInt(u.name.c_str(), &u.int4.x);
+				ImGui::InputInt(u.name.c_str(), glm::value_ptr<int32_t>(u.int4));
+				break;
+
+			case uniform_type::IVEC2:
+			case uniform_type::UVEC2:
+				ImGui::InputInt2(u.name.c_str(), glm::value_ptr<int32_t>(u.int4));
+				break;
+
+			case uniform_type::IVEC3:
+			case uniform_type::UVEC3:
+				ImGui::InputInt3(u.name.c_str(), glm::value_ptr<int32_t>(u.int4));
+				break;
+
+			case uniform_type::IVEC4:
+			case uniform_type::UVEC4:
+				ImGui::InputInt4(u.name.c_str(), glm::value_ptr<int32_t>(u.int4));
 				break;
 
 			case uniform_type::BOOL:
@@ -407,24 +433,97 @@ static void bind_uniforms(const std::vector<uniform_t>& uniforms)
 				glUniform1f(u.location, u.float4.x);
 				break;
 
+			case uniform_type::VEC2:
+				glUniform2fv(u.location, 1, glm::value_ptr<float>(u.float4));
+				break;
+
 			case uniform_type::VEC3:
 				glUniform3fv(u.location, 1, glm::value_ptr<float>(u.float4));
+				break;
+
+			case uniform_type::VEC4:
+				glUniform4fv(u.location, 1, glm::value_ptr<float>(u.float4));
 				break;
 
 			case uniform_type::DOUBLE:
 				glUniform1d(u.location, static_cast<double>(u.float4.x));
 				break;
 
+			case uniform_type::DVEC2:
+				glUniform2d(u.location, static_cast<double>(u.float4.x),
+										static_cast<double>(u.float4.y));
+				break;
+
+			case uniform_type::DVEC3:
+				glUniform3d(u.location, static_cast<double>(u.float4.x),
+										static_cast<double>(u.float4.y),
+										static_cast<double>(u.float4.z));
+				break;
+
+			case uniform_type::DVEC4:
+				glUniform4d(u.location, static_cast<double>(u.float4.x),
+										static_cast<double>(u.float4.y),
+										static_cast<double>(u.float4.z),
+										static_cast<double>(u.float4.w));
+				break;
+
 			case uniform_type::INT:
 				glUniform1i(u.location, static_cast<int32_t>(u.int4.x));
+				break;
+
+			case uniform_type::IVEC2:
+				glUniform2iv(u.location, 1, glm::value_ptr<int32_t>(u.int4));
+				break;
+
+			case uniform_type::IVEC3:
+				glUniform3iv(u.location, 1, glm::value_ptr<int32_t>(u.int4));
+				break;
+
+			case uniform_type::IVEC4:
+				glUniform4iv(u.location, 1, glm::value_ptr<int32_t>(u.int4));
 				break;
 
 			case uniform_type::UINT:
 				glUniform1ui(u.location, static_cast<uint32_t>(u.int4.x));
 				break;
 
+			case uniform_type::UVEC2:
+				glUniform2ui(u.location, static_cast<uint32_t>(u.int4.x),
+										 static_cast<uint32_t>(u.int4.y));
+				break;
+
+			case uniform_type::UVEC3:
+				glUniform3ui(u.location, static_cast<uint32_t>(u.int4.x),
+										 static_cast<uint32_t>(u.int4.y),
+										 static_cast<uint32_t>(u.int4.z));
+				break;
+
+			case uniform_type::UVEC4:
+				glUniform4ui(u.location, static_cast<uint32_t>(u.int4.x),
+										 static_cast<uint32_t>(u.int4.y),
+										 static_cast<uint32_t>(u.int4.z),
+										 static_cast<uint32_t>(u.int4.w));
+
 			case uniform_type::BOOL:
 				glUniform1ui(u.location, static_cast<uint32_t>(u.bool4.x));
+				break;
+
+			case uniform_type::BVEC2:
+				glUniform2ui(u.location, static_cast<uint32_t>(u.bool4.x),
+										 static_cast<uint32_t>(u.bool4.y));
+				break;
+
+			case uniform_type::BVEC3:
+				glUniform3ui(u.location, static_cast<uint32_t>(u.bool4.x),
+										 static_cast<uint32_t>(u.bool4.y),
+										 static_cast<uint32_t>(u.bool4.z));
+				break;
+
+			case uniform_type::BVEC4:
+				glUniform4ui(u.location, static_cast<uint32_t>(u.bool4.x),
+										 static_cast<uint32_t>(u.bool4.y),
+										 static_cast<uint32_t>(u.bool4.z),
+										 static_cast<uint32_t>(u.bool4.w));
 				break;
 
 			default:

@@ -11,7 +11,8 @@ void normal(in vec3 point, out vec3 normal)
 float shadow(in vec3 origin, in vec3 light_vector, in float k)
 {
 	float res = 1.0;
-    for (float t = 0.01f; t < 5.0f;)
+
+    for (float t = 0.03f; t < 5.0f;)
     {
         float h = scene(origin + light_vector * t);
         if (h < epsilon)
@@ -21,6 +22,7 @@ float shadow(in vec3 origin, in vec3 light_vector, in float k)
 #endif
         t += h;
     }
+
     return res;
 }
 

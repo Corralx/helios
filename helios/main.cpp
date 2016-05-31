@@ -109,7 +109,8 @@ int main(int, char*[])
 
 	assert(glGetError() == GL_NO_ERROR);
 
-	bool use_time;
+	// This is used to avoid setting an uniform we don't use and cause and INVALID_OPERATION
+	bool use_time = false;
 
 	/* Compile the programs*/
 	raymarch_program_info rpi{};
@@ -248,13 +249,13 @@ int main(int, char*[])
 
 		imgui_new_frame();
 
-		time_passed = std::chrono::duration_cast<std::chrono::duration<float>>(hr_clock::now() - start_time);
-
 		/* Dispatch the compute to generate the image */
 		glUseProgram(raymarch_program);
-		// If time is not used the uniform can be optmized away and cause a lot of INVALID_OPERATION
 		if (use_time)
+		{
+			time_passed = std::chrono::duration_cast<std::chrono::duration<float>>(hr_clock::now() - start_time);
 			glUniform1f(1014, time_passed.count());
+		}
 		glUniform3fv(1015, 1, glm::value_ptr(light.direction));
 		glUniform3fv(1016, 1, glm::value_ptr(light.color));
 		glUniform3fv(1017, 1, glm::value_ptr(camera.position));
@@ -543,11 +544,13 @@ static void copy_uniforms_value(std::vector<uniform_t>& old_uniforms, std::vecto
 {
 	for (auto& u : new_uniforms)
 	{
+		// We reuse the current value only if the uniform as the same name and the same type
 		auto it = std::find_if(old_uniforms.begin(), old_uniforms.end(), [&u](const uniform_t& old_u)
 		{
 			return u.name == old_u.name && u.type == old_u.type;
 		});
 
+		// We haven't found the uniform, so it is new and will be initialized to 0
 		if (it == old_uniforms.end())
 			continue;
 

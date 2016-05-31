@@ -7,6 +7,7 @@
 #include <experimental/filesystem>
 
 #include "GL/gl3w.h"
+#include "glm/glm.hpp"
 
 namespace fs { using namespace std::experimental::filesystem::v1; }
 using namespace std::chrono_literals;
@@ -51,27 +52,30 @@ enum class uniform_type : uint8_t
 	DVEC4
 };
 
+// TODO(Corralx): Find a way to specify a default value?
 struct uniform_t
 {
-	uniform_t(const std::string& n, uint32_t l, uniform_type t, float min, float max, float val) :
-		name(n), location(l), type(t), min_value(min), max_value(max), value(val) {}
+	uniform_t(const std::string& n, uniform_type t) :
+		name(n), location(invalid_handle), type(t), float4(1.f) {}
 
 	std::string name;
 	uint32_t location;
 	uniform_type type;
 
-	float min_value;
-	float max_value;
-	float value;
+	union
+	{
+		glm::vec4 float4;
+		glm::ivec4 int4;
+	};
 };
 
-/* The calling thread must have a valid OpenGL context made current before calling these */
+// NOTE(Corralx): An active GL context is required on the calling thread for these to work
 uint32_t compile_shader(const std::string& source, shader_type type);
 uint32_t link_program(std::initializer_list<uint32_t> shaders);
-std::vector<uniform_t> extract_uniform(const std::string& source, uint32_t program);
 
 #ifdef _DEBUG
 void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, void* userParam);
 #endif
 
-void extract_uniform(const std::string& source);
+// NOTE(Corralx): After the call, the locations of the uniforms in the real compiled program is still to be retrieved
+std::vector<uniform_t> extract_uniform(const std::string& source);

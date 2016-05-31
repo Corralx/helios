@@ -2,9 +2,14 @@
 
 #include <fstream>
 #include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
 #include <unordered_map>
-#include <regex>
+#include <algorithm>
+
 #include "GL/gl3w.h"
+#include "ShaderLang.h"
 
 std::string get_content_of_file(const fs::path& path)
 {
@@ -58,71 +63,6 @@ uint32_t link_program(std::initializer_list<uint32_t> shaders)
 		return invalid_handle;
 
 	return program;
-}
-
-static const std::unordered_map<std::string, uniform_type> uniform_type_dict =
-{
-	{ "float", uniform_type::FLOAT },
-	{ "vec2", uniform_type::VEC2 },
-	{ "vec3", uniform_type::VEC3 },
-	{ "vec4", uniform_type::VEC4 },
-	{ "bool", uniform_type::BOOL },
-	{ "bvec2", uniform_type::BVEC2 },
-	{ "bvec3", uniform_type::BVEC3 },
-	{ "bvec4", uniform_type::BVEC4 },
-	{ "int", uniform_type::INT },
-	{ "ivec2", uniform_type::IVEC2 },
-	{ "ivec3", uniform_type::IVEC3 },
-	{ "ivec4", uniform_type::IVEC4 },
-	{ "uint", uniform_type::UINT },
-	{ "uvec2", uniform_type::UVEC2 },
-	{ "uvec3", uniform_type::UVEC3 },
-	{ "uvec4", uniform_type::UVEC4 },
-	{ "double", uniform_type::DOUBLE },
-	{ "dvec2", uniform_type::DVEC2 },
-	{ "dvec3", uniform_type::DVEC3 },
-	{ "dvec4", uniform_type::DVEC4 },
-};
-
-// TODO(Corralx): We parse commented uniforms too, but we exclude them later on because they don't have a location
-// TODO(Corralx): We do not support vectors, matrices or booleans yet
-std::vector<uniform_t> extract_uniform(const std::string& source, uint32_t program)
-{
-	// NOTE(Corralx): We only parse GLSL code that has already been compiled, so we assume it is correct
-	static std::regex uniform_regex(".*uniform\\s*"
-									"(float|int|uint|double)\\s*"
-									"([a-z0-9_]*)\\s*;\\s*"
-									"//\\s*min\\s*:\\s*(-?[0-9]*\\.?[0-9]*)f?\\s*;"
-									"\\s*max\\s*:\\s*(-?[0-9]*\\.?[0-9]*)f?\\s*;"
-									"\\s*default\\s*:\\s*(-?[0-9]*\\.?[0-9]*)f?\\s*;",
-									std::regex::ECMAScript | std::regex::icase | std::regex::optimize);
-	std::smatch uniform_match;
-	std::vector<uniform_t> uniforms;
-
-	std::string::const_iterator cbegin(source.cbegin());
-	while (std::regex_search(cbegin, source.cend(), uniform_match, uniform_regex))
-	{
-		if (!uniform_match.empty())
-		{
-			std::string name = uniform_match[2];
-			uint32_t location = glGetUniformLocation(program, name.c_str());
-			uniform_type type = uniform_type_dict.at(uniform_match[1]);
-
-			float min_value = stof(uniform_match[3]);
-			float max_value = stof(uniform_match[4]);
-			float value = stof(uniform_match[5]);
-
-			if (location != invalid_handle)
-				uniforms.emplace_back(name, location, type, min_value, max_value, value);
-			else
-				std::cout << "Ignoring uniform \"" << name <<
-							 "\" because his location could not be retrived (optimized away?)" << std::endl;
-		}
-
-		cbegin += uniform_match.position() + uniform_match.length();
-	}
-
-	return std::move(uniforms);
 }
 
 #ifdef _DEBUG
@@ -179,22 +119,62 @@ void gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, G
 }
 #endif
 
-#include "ShaderLang.h"
+// TODO(Corralx): Find a better way to declare these, instead of hardcoding them
+static std::vector<std::string> default_uniforms =
+{
+	"screen_width",
+	"screen_height",
+	"light_direction",
+	"light_color",
+	"camera_position",
+	"camera_view",
+	"camera_up",
+	"camera_right",
+	"focal_length",
+	"time",
+	"output_image"
+};
+
+// This maps OpenGL type identiers to our enum-based uniform types
+static const std::unordered_map<int32_t, uniform_type> uniform_type_dict =
+{
+	{ GL_FLOAT,				uniform_type::FLOAT	 },
+	{ GL_FLOAT_VEC2,		uniform_type::VEC2	 },
+	{ GL_FLOAT_VEC3,		uniform_type::VEC3	 },
+	{ GL_FLOAT_VEC4,		uniform_type::VEC4	 },
+	{ GL_BOOL,				uniform_type::BOOL	 },
+	{ GL_BOOL_VEC2,			uniform_type::BVEC2  },
+	{ GL_BOOL_VEC3,			uniform_type::BVEC3  },
+	{ GL_BOOL_VEC4,			uniform_type::BVEC4  },
+	{ GL_INT,				uniform_type::INT	 },
+	{ GL_INT_VEC2,			uniform_type::IVEC2  },
+	{ GL_INT_VEC3,			uniform_type::IVEC3  },
+	{ GL_INT_VEC4,			uniform_type::IVEC4  },
+	{ GL_UNSIGNED_INT,		uniform_type::UINT	 },
+	{ GL_UNSIGNED_INT_VEC2, uniform_type::UVEC2  },
+	{ GL_UNSIGNED_INT_VEC3, uniform_type::UVEC3  },
+	{ GL_UNSIGNED_INT_VEC4, uniform_type::UVEC4  },
+	{ GL_DOUBLE,			uniform_type::DOUBLE },
+	{ GL_DOUBLE_VEC2,		uniform_type::DVEC2	 },
+	{ GL_DOUBLE_VEC3,		uniform_type::DVEC3  },
+	{ GL_DOUBLE_VEC4,		uniform_type::DVEC4  }
+};
 
 using namespace glslang;
 
+// We use C++11 magic statics to automagically manage glslang initialization/destruction
+// http://en.cppreference.com/w/cpp/language/storage_duration#Static_local_variables
 struct glslang_raii
 {
 	glslang_raii() { InitializeProcess(); }
 	~glslang_raii() { FinalizeProcess(); }
 };
 
-void extract_uniform(const std::string& source)
+std::vector<uniform_t> extract_uniform(const std::string& source)
 {
 	static glslang_raii glslang_raii{};
 
-	TShader* shader = new TShader(EShLangCompute);
-
+	auto shader = std::make_unique<TShader>(EShLangCompute);
 	auto source_ptr = source.c_str();
 	shader->setStrings(&source_ptr, 1);
 
@@ -204,28 +184,39 @@ void extract_uniform(const std::string& source)
 		std::cout << shader->getInfoLog() << std::endl;
 		std::cout << shader->getInfoDebugLog() << std::endl;
 
-		delete shader;
-		return;
+		return{};
 	}
 
-	TProgram* program = new TProgram();
-	program->addShader(shader);
+	auto program = std::make_unique<TProgram>();
+	program->addShader(shader.get());
+
 	if (!program->link(EShMsgDefault))
 	{
 		std::cout << "Error linking program: " << std::endl;
 		std::cout << program->getInfoLog() << std::endl;
 		std::cout << program->getInfoDebugLog() << std::endl;
 
-		delete program;
-		delete shader;
-		return;
+		return{};
 	}
 
+	// Generate the reflection information for the AST
 	program->buildReflection();
+
+	std::vector<uniform_t> uniforms;
 	int32_t num_uniforms = program->getNumLiveUniformVariables();
 	for (int32_t i = 0; i < num_uniforms; ++i)
-		std::cout << "Name: " << program->getUniformName(i) << "   Type: " << program->getUniformType(i) << std::endl;
+	{
+		std::string name = program->getUniformName(i);
 
-	delete program;
-	delete shader;
+		// Skip default uniforms
+		if (std::find(default_uniforms.begin(), default_uniforms.end(), name) != default_uniforms.end())
+			continue;
+
+		int32_t gl_type = program->getUniformType(i);
+		uniform_type type = uniform_type_dict.at(gl_type);
+
+		uniforms.emplace_back(name, type);
+	}
+
+	return std::move(uniforms);
 }

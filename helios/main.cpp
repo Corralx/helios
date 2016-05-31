@@ -53,6 +53,7 @@ struct light_t
 };
 
 static SDL_Window* open_window();
+static void get_locations(std::vector<uniform_t>& uniforms, uint32_t program);
 static void generate_gui(std::vector<uniform_t>& uniforms);
 static void bind_uniforms(const std::vector<uniform_t>& uniforms);
 
@@ -120,16 +121,15 @@ int main(int, char*[])
 	std::vector<uniform_t> uniforms;
 	uint32_t raymarch_program = invalid_handle;
 	{
-		std::string scene_source = get_content_of_file(rpi.scene_path);
-		uint32_t raymarch_shader = compile_shader(rpi.base_source + rpi.library_source + 
-												  scene_source + rpi.main_source,
-												  shader_type::COMPUTE);
+		std::string raymarch_source = rpi.base_source + rpi.library_source +
+									  get_content_of_file(rpi.scene_path) + rpi.main_source;
+		uint32_t raymarch_shader = compile_shader(raymarch_source, shader_type::COMPUTE);
 
 		raymarch_program = link_program({ raymarch_shader });
 		glDeleteShader(raymarch_shader);
 
-		uniforms = extract_uniform(scene_source, raymarch_program);
-		extract_uniform(rpi.base_source + rpi.library_source + scene_source + rpi.main_source);
+		uniforms = extract_uniform(raymarch_source);
+		get_locations(uniforms, raymarch_program);
 	}
 	assert(raymarch_program != invalid_handle);
 
@@ -157,17 +157,16 @@ int main(int, char*[])
 		std::cout << std::put_time(std::localtime(&current_time), "[%T]") << " Recompiling scene..." << std::endl;
 
 		SDL_GL_MakeCurrent(sdl_window, compiler_context);
-		std::string scene_source = get_content_of_file(rpi.scene_path);
-		uint32_t compute_shader = compile_shader(rpi.base_source + rpi.library_source +
-												 scene_source + rpi.main_source,
-												 shader_type::COMPUTE);
+		std::string compute_source = rpi.base_source + rpi.library_source +
+									 get_content_of_file(rpi.scene_path) + rpi.main_source;
+		uint32_t compute_shader = compile_shader(compute_source, shader_type::COMPUTE);
 
 		// TODO(Corralx): Emit an error to the user if the compilation has failed
 		compiled_program = link_program({ compute_shader });
 		glDeleteShader(compute_shader);
 
-		// TODO(Corralx): Do not reset every value to default after each recompilation
-		uniforms = extract_uniform(scene_source, compiled_program);
+		uniforms = extract_uniform(compute_source);
+		get_locations(uniforms, compiled_program);
 
 		swap_program = true;
 		assert(compiled_program != invalid_handle);
@@ -336,6 +335,19 @@ SDL_Window* open_window()
 							WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen_flag);
 }
 
+static void get_locations(std::vector<uniform_t>& uniforms, uint32_t program)
+{
+	for (auto& u : uniforms)
+	{
+		uint32_t loc = glGetUniformLocation(program, u.name.c_str());
+		if (loc == invalid_handle)
+			std::cout << "Could not retrieve location for uniform \"" << u.name
+					  << "\" (Maybe it was optimized away?)" << std::endl;
+
+		u.location = loc;
+	}
+}
+
 static void generate_gui(std::vector<uniform_t>& uniforms)
 {
 	if (uniforms.empty())
@@ -349,12 +361,16 @@ static void generate_gui(std::vector<uniform_t>& uniforms)
 		{
 			case uniform_type::FLOAT:
 			case uniform_type::DOUBLE:
-				ImGui::SliderFloat(u.name.c_str(), &u.value, u.min_value, u.max_value);
+				ImGui::InputFloat(u.name.c_str(), glm::value_ptr<float>(u.float4));
+				break;
+
+			case uniform_type::VEC3:
+				ImGui::InputFloat3(u.name.c_str(), glm::value_ptr<float>(u.float4));
 				break;
 
 			case uniform_type::INT:
 			case uniform_type::UINT:
-				ImGui::SliderFloat(u.name.c_str(), &u.value, u.min_value, u.max_value, "%.0f");
+				ImGui::InputInt(u.name.c_str(), &u.int4.x);
 				break;
 
 			default:
@@ -368,22 +384,29 @@ static void bind_uniforms(const std::vector<uniform_t>& uniforms)
 {
 	for (const auto& u : uniforms)
 	{
+		if (u.location == invalid_handle)
+			continue;
+
 		switch (u.type)
 		{
 			case uniform_type::FLOAT:
-				glUniform1f(u.location, u.value);
+				glUniform1f(u.location, u.float4.x);
+				break;
+
+			case uniform_type::VEC3:
+				glUniform3fv(u.location, 1, glm::value_ptr<float>(u.float4));
 				break;
 
 			case uniform_type::DOUBLE:
-				glUniform1d(u.location, static_cast<double>(u.value));
+				glUniform1d(u.location, static_cast<double>(u.float4.x));
 				break;
 
 			case uniform_type::INT:
-				glUniform1i(u.location, static_cast<int32_t>(u.value));
+				glUniform1i(u.location, static_cast<int32_t>(u.int4.x));
 				break;
 
 			case uniform_type::UINT:
-				glUniform1ui(u.location, static_cast<uint32_t>(u.value));
+				glUniform1ui(u.location, static_cast<uint32_t>(u.int4.x));
 				break;
 
 			default:

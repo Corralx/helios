@@ -81,7 +81,8 @@ static SDL_Window* open_window();
 static void copy_uniforms_value(std::vector<uniform_t>& old_uniforms, std::vector<uniform_t>& new_uniforms);
 static void get_locations(std::vector<uniform_t>& uniforms, uint32_t program);
 static void generate_gui(std::vector<uniform_t>& uniforms);
-static void bind_uniforms(const std::vector<uniform_t>& uniforms);
+static void bind_raymarch_uniforms(const raymarch_t& params);
+static void bind_user_uniforms(const std::vector<uniform_t>& uniforms);
 
 static constexpr uint32_t WINDOW_WIDTH = 1280;
 static constexpr uint32_t WINDOW_HEIGHT = 720;
@@ -282,22 +283,10 @@ int main(int, char*[])
 		glUseProgram(raymarch_program);
 
 		// TODO(Corralx): an UBO should be used for performance here
-		/* Default uniforms */
-		glUniform1f(1000, raymarch_params.epsilon);
-		glUniform1f(1001, raymarch_params.z_far);
-		glUniform1f(1002, raymarch_params.normal_epsilon);
-		glUniform1f(1003, raymarch_params.starting_step);
-		glUniform1i(1004, raymarch_params.max_iterations);
-		glUniform1ui(1005, raymarch_params.enable_shadow);
-		glUniform1ui(1006, raymarch_params.soft_shadow);
-		glUniform1f(1007, raymarch_params.shadow_quality);
-		glUniform1f(1008, raymarch_params.shadow_epsilon);
-		glUniform1f(1009, raymarch_params.shadow_starting_step);
-		glUniform1f(1010, raymarch_params.shadow_max_step);
-		glUniform1i(1011, raymarch_params.enable_ambient_occlusion);
-		glUniform1f(1012, raymarch_params.ambient_occlusion_step);
-		glUniform1i(1013, raymarch_params.ambient_occlusion_iterations);
+		/* Raymarch uniforms */
+		bind_raymarch_uniforms(raymarch_params);
 		
+		/* Scene uniforms */
 		if (use_time)
 		{
 			time_passed = std::chrono::duration_cast<std::chrono::duration<float>>(hr_clock::now() - start_time);
@@ -315,7 +304,7 @@ int main(int, char*[])
 		glUniform1ui(1023, WINDOW_HEIGHT);
 
 		/* User uniforms */
-		bind_uniforms(uniforms);
+		bind_user_uniforms(uniforms);
 
 		glDispatchCompute(group_size.x, group_size.y, 1);
 
@@ -460,7 +449,7 @@ static void generate_gui(std::vector<uniform_t>& uniforms)
 	if (uniforms.empty())
 		return;
 
-	if (!ImGui::CollapsingHeader("Custom uniforms"))
+	if (!ImGui::CollapsingHeader("Custom parameters"))
 		return;
 	
 	for (auto& u : uniforms)
@@ -518,7 +507,7 @@ static void generate_gui(std::vector<uniform_t>& uniforms)
 	}
 }
 
-static void bind_uniforms(const std::vector<uniform_t>& uniforms)
+static void bind_user_uniforms(const std::vector<uniform_t>& uniforms)
 {
 	for (const auto& u : uniforms)
 	{
@@ -681,4 +670,22 @@ static void copy_uniforms_value(std::vector<uniform_t>& old_uniforms, std::vecto
 				break;
 		}
 	}
+}
+
+static void bind_raymarch_uniforms(const raymarch_t& params)
+{
+	glUniform1f(1000, params.epsilon);
+	glUniform1f(1001, params.z_far);
+	glUniform1f(1002, params.normal_epsilon);
+	glUniform1f(1003, params.starting_step);
+	glUniform1i(1004, params.max_iterations);
+	glUniform1ui(1005, params.enable_shadow);
+	glUniform1ui(1006, params.soft_shadow);
+	glUniform1f(1007, params.shadow_quality);
+	glUniform1f(1008, params.shadow_epsilon);
+	glUniform1f(1009, params.shadow_starting_step);
+	glUniform1f(1010, params.shadow_max_step);
+	glUniform1i(1011, params.enable_ambient_occlusion);
+	glUniform1f(1012, params.ambient_occlusion_step);
+	glUniform1i(1013, params.ambient_occlusion_iterations);
 }

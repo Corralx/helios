@@ -53,6 +53,7 @@ struct light_t
 };
 
 static SDL_Window* open_window();
+static void copy_uniforms_value(std::vector<uniform_t>& old_uniforms, std::vector<uniform_t>& new_uniforms);
 static void get_locations(std::vector<uniform_t>& uniforms, uint32_t program);
 static void generate_gui(std::vector<uniform_t>& uniforms);
 static void bind_uniforms(const std::vector<uniform_t>& uniforms);
@@ -120,7 +121,7 @@ int main(int, char*[])
 		rpi.main_source = get_content_of_file(fs::path(ASSETS_FOLDER) / "raymarch_main.comp");
 	}
 
-	std::vector<uniform_t> uniforms;
+	std::vector<uniform_t> uniforms{};
 	uint32_t raymarch_program = invalid_handle;
 	{
 		std::string raymarch_source = rpi.base_source + rpi.library_source +
@@ -130,8 +131,10 @@ int main(int, char*[])
 		raymarch_program = link_program({ raymarch_shader });
 		glDeleteShader(raymarch_shader);
 
-		uniforms = extract_uniform(raymarch_source);
-		get_locations(uniforms, raymarch_program);
+		auto new_uniforms = extract_uniform(raymarch_source);
+		copy_uniforms_value(uniforms, new_uniforms);
+		get_locations(new_uniforms, raymarch_program);
+		uniforms = std::move(new_uniforms);
 
 		use_time = (glGetUniformLocation(raymarch_program, "time") != invalid_handle);
 	}
@@ -170,8 +173,11 @@ int main(int, char*[])
 		compiled_program = link_program({ compute_shader });
 		glDeleteShader(compute_shader);
 
-		uniforms = extract_uniform(compute_source);
-		get_locations(uniforms, compiled_program);
+		auto new_uniforms = extract_uniform(compute_source);
+		copy_uniforms_value(uniforms, new_uniforms);
+		get_locations(new_uniforms, compiled_program);
+		uniforms = std::move(new_uniforms);
+
 		use_time = (glGetUniformLocation(compiled_program, "time") != invalid_handle);
 
 		swap_program = true;
@@ -524,6 +530,56 @@ static void bind_uniforms(const std::vector<uniform_t>& uniforms)
 										 static_cast<uint32_t>(u.bool4.y),
 										 static_cast<uint32_t>(u.bool4.z),
 										 static_cast<uint32_t>(u.bool4.w));
+				break;
+
+			default:
+				assert(false);
+				break;
+		}
+	}
+}
+
+static void copy_uniforms_value(std::vector<uniform_t>& old_uniforms, std::vector<uniform_t>& new_uniforms)
+{
+	for (auto& u : new_uniforms)
+	{
+		auto it = std::find_if(old_uniforms.begin(), old_uniforms.end(), [&u](const uniform_t& old_u)
+		{
+			return u.name == old_u.name && u.type == old_u.type;
+		});
+
+		if (it == old_uniforms.end())
+			continue;
+
+		switch (u.type)
+		{
+			case uniform_type::FLOAT:
+			case uniform_type::VEC2:
+			case uniform_type::VEC3:
+			case uniform_type::VEC4:
+			case uniform_type::DOUBLE:
+			case uniform_type::DVEC2:
+			case uniform_type::DVEC3:
+			case uniform_type::DVEC4:
+				u.float4 = it->float4;
+				break;
+
+			case uniform_type::INT:
+			case uniform_type::IVEC2:
+			case uniform_type::IVEC3:
+			case uniform_type::IVEC4:
+			case uniform_type::UINT:
+			case uniform_type::UVEC2:
+			case uniform_type::UVEC3:
+			case uniform_type::UVEC4:
+				u.int4 = it->int4;
+				break;
+
+			case uniform_type::BOOL:
+			case uniform_type::BVEC2:
+			case uniform_type::BVEC3:
+			case uniform_type::BVEC4:
+				u.bool4 = it->bool4;
 				break;
 
 			default:

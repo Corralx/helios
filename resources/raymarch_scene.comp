@@ -8,5 +8,6 @@ float scene(in vec3 point)
 	return op_blend(obj, sd_plane(point, vec4(0.0, 1.0, 0.0, 0.5)), blend_value);
 }
 
+#define ENABLE_SHADOW
 #define SOFT_SHADOW
-#define AMBIENT_OCCLUSION
+#define ENABLE_AMBIENT_OCCLUSION

@@ -1,6 +1,6 @@
 void normal(in vec3 point, out vec3 normal)
 {
-	vec3 v = vec3(0.0002f, 0, 0);
+	const vec3 v = vec3(0.0001f, 0, 0);
 
 	normal = normalize(vec3(
 		scene(point + v) - scene(point - v),
@@ -47,8 +47,11 @@ void shade(in vec3 p, in vec3 light_vector, out vec3 color)
 
 	float l_dot_n = max(dot(light_vector, n), 0.0);
 
-	color = light_color * l_dot_n * (shadow(p, light_vector, 128.0f) + 0.2f);
-	#ifdef AMBIENT_OCCLUSION
+	color = light_color * l_dot_n;
+	#ifdef ENABLE_SHADOW
+	color *= shadow(p, light_vector, 128.0f) + 0.2f;
+	#endif
+	#ifdef ENABLE_AMBIENT_OCCLUSION
 	color *= 1.0f - ambient_occlusion(p, n);
 	#endif
 }
@@ -90,7 +93,7 @@ void main()
 		if (d < epsilon)
 		{
 			shade(p, light_vector, color_out);
-            break;
+			break;
 		}
     }
 

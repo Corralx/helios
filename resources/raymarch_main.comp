@@ -1,24 +1,24 @@
-float __hl_saturate(float v)
+float _hl_saturate(float v)
 {
 	return clamp(v, 0.0, 1.0);
 }
 
-vec2 __hl_saturate(vec2 v)
+vec2 _hl_saturate(vec2 v)
 {
 	return clamp(v, vec2(0.0), vec2(1.0));
 }
 
-vec3 __hl_saturate(vec3 v)
+vec3 _hl_saturate(vec3 v)
 {
 	return clamp(v, vec3(0.0), vec3(1.0));
 }
 
-vec4 __hl_saturate(vec4 v)
+vec4 _hl_saturate(vec4 v)
 {
 	return clamp(v, vec4(0.0), vec4(1.0));
 }
 
-float __hl_remap_range(float x, vec2 old_range, vec2 new_range)
+float _hl_remap_range(float x, vec2 old_range, vec2 new_range)
 {
 	float a = (new_range.y - new_range.x) / (old_range.y - old_range.x);
 	float b = new_range.x - a * old_range.x;
@@ -26,14 +26,14 @@ float __hl_remap_range(float x, vec2 old_range, vec2 new_range)
 }
 
 // https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
-float __hl_rand(vec2 co)
+float _hl_rand(vec2 co)
 {
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-void __hl_approximate_normal(in vec3 point, out vec3 normal)
+void _hl_approximate_normal(in vec3 point, out vec3 normal)
 {
-	const vec3 v = vec3(__hl_normal_epsilon, 0, 0);
+	const vec3 v = vec3(_hl_normal_epsilon, 0, 0);
 
 	normal = normalize(vec3(
 		scene(point + v)     - scene(point - v),
@@ -41,90 +41,90 @@ void __hl_approximate_normal(in vec3 point, out vec3 normal)
 		scene(point + v.zyx) - scene(point - v.zyx)));
 }
 
-float __hl_shadow(in vec3 origin, in vec3 light_vector, in float k)
+float _hl_shadow(in vec3 origin, in vec3 light_vector, in float k)
 {
 	float res = 1.0;
 
-    for (float t = __hl_shadow_starting_step; t < __hl_shadow_max_step; )
+    for (float t = _hl_shadow_starting_step; t < _hl_shadow_max_step; )
     {
         float h = scene(origin + light_vector * t);
 
-        if (h < __hl_shadow_epsilon)
+        if (h < _hl_shadow_epsilon)
             return 0.0;
 
-		if (__hl_soft_shadow)
+		if (_hl_soft_shadow)
 			res = min(res, k * h / t);
 
         t += h;
     }
 
-    return __hl_saturate(res);
+    return _hl_saturate(res);
 }
 
-float __hl_ambient_occlusion(in vec3 point, in vec3 normal)
+float _hl_ambient_occlusion(in vec3 point, in vec3 normal)
 {
-	float step_size = __hl_ambient_occlusion_step;
+	float step_size = _hl_ambient_occlusion_step;
 	float t = step_size;
 	float oc = 0.0f;
 
-	for (int i = 0; i < __hl_ambient_occlusion_iterations; ++i)
+	for (int i = 0; i < _hl_ambient_occlusion_iterations; ++i)
 	{
 		float d = scene(point + normal * t);
 		oc += t - d;
 		t += step_size;
 	}
 
-	return __hl_saturate(oc);
+	return _hl_saturate(oc);
 }
 
 // http://www.iquilezles.org/www/articles/fog/fog.htm
-void __hl_apply_fog_simple(inout vec3 color, in float dist)
+void _hl_apply_fog_simple(inout vec3 color, in float dist)
 {
     float fogAmount = 1.0 - exp(-dist * 0.2);
     vec3  fogColor  = vec3(0.5,0.6,0.7);
     color = mix(color, fogColor, fogAmount);
 }
 
-vec3 __hl_shade(in vec3 p, in vec3 n, in vec3 color)
+vec3 _hl_shade(in vec3 p, in vec3 n, in vec3 color)
 {
-	vec3 light_vector = normalize(-__hl_light_direction);
+	vec3 light_vector = normalize(-_hl_light_direction);
 	float l_dot_n = max(dot(light_vector, n), 0.0);
 
-	vec3 color_out = __hl_light_color * l_dot_n * color;
+	vec3 color_out = _hl_light_color * l_dot_n * color;
 
-	if (__hl_enable_shadow)
-		color_out *= __hl_shadow(p, light_vector, __hl_shadow_quality) + 0.2f;
+	if (_hl_enable_shadow)
+		color_out *= _hl_shadow(p, light_vector, _hl_shadow_quality) + 0.2f;
 
-	if (__hl_enable_ambient_occlusion)
-		color_out *= 1.0f - __hl_ambient_occlusion(p, n);
+	if (_hl_enable_ambient_occlusion)
+		color_out *= 1.0f - _hl_ambient_occlusion(p, n);
 
-	return __hl_saturate(color_out);
+	return _hl_saturate(color_out);
 }
 
-vec3 __hl_floor_color(in vec3 point)
+vec3 _hl_floor_color(in vec3 point)
 {
 	vec2 m = mod(point.xz, 2.0) - vec2(1.0);
 	return m.x * m.y > 0.0 ? vec3(0.4) : vec3(1.0);
 }
 
-void __hl_raymarch(in vec3 ro, in vec3 rd, inout int it, out float dist)
+void _hl_raymarch(in vec3 ro, in vec3 rd, inout int it, out float dist)
 {
-	dist = __hl_starting_step;
+	dist = _hl_starting_step;
 
-	for (it = 0; it < __hl_max_iterations; ++it)
+	for (it = 0; it < _hl_max_iterations; ++it)
     {
         float d = scene(ro + rd * dist);
 
-		if (d < __hl_epsilon * dist || dist > __hl_z_far)
+		if (d < _hl_epsilon * dist || dist > _hl_z_far)
 			break;
 
 		dist += d;
     }
 
-	dist = clamp(dist, 0.0, __hl_z_far);
+	dist = clamp(dist, 0.0, _hl_z_far);
 }
 
-vec3 __hl_compute_color(in vec3 ro, in vec3 rd)
+vec3 _hl_compute_color(in vec3 ro, in vec3 rd)
 {
 	vec3 point;
 	vec3 normal;
@@ -134,33 +134,33 @@ vec3 __hl_compute_color(in vec3 ro, in vec3 rd)
 
 	vec3 base_color;
 
-	__hl_raymarch(ro, rd, iterations, t);
-	float floor_dist = dot(vec3(0.0, __hl_floor_height, 0.0) - ro, vec3(0.0, 1.0, 0.0)) / dot(rd, vec3(0.0, 1.0, 0.0));
+	_hl_raymarch(ro, rd, iterations, t);
+	float floor_dist = dot(vec3(0.0, _hl_floor_height, 0.0) - ro, vec3(0.0, 1.0, 0.0)) / dot(rd, vec3(0.0, 1.0, 0.0));
 
-	if (floor_dist < t && floor_dist < __hl_z_far && floor_dist > 0.0)
+	if (floor_dist < t && floor_dist < _hl_z_far && floor_dist > 0.0)
 	{
 		// Floor surface
 		t = floor_dist;
 		point = ro + rd * t;
 		normal = vec3(0.0, 1.0, 0.0);
-		base_color = __hl_floor_color(point);
+		base_color = _hl_floor_color(point);
 	}
-	else if (iterations < __hl_max_iterations && t < __hl_z_far)
+	else if (iterations < _hl_max_iterations && t < _hl_z_far)
 	{
 		// Primitive surface
 		point = ro + rd * t;
-		__hl_approximate_normal(point, normal);
+		_hl_approximate_normal(point, normal);
 		// TODO(Corralx): Fetch color from primitive ID
 		base_color = vec3(0.9, 0.9, 0.9);
 	}
 	else
 	{
 		// Sky
-		return __hl_sky_color;
+		return _hl_sky_color;
 	}
 
 	// TODO(Corralx): Apply fog
-	return __hl_shade(point, normal, base_color);
+	return _hl_shade(point, normal, base_color);
 }
 
 void main()
@@ -176,9 +176,9 @@ void main()
 	float u = coord.x * 2.0 / resolution.x - 1.0;
     float v = coord.y * 2.0 / resolution.y - 1.0;
 
-    vec3 ray_dir = normalize(__hl_camera_view * __hl_focal_length + __hl_camera_right * u * aspect_ratio + __hl_camera_up * v);
+    vec3 ray_dir = normalize(_hl_camera_view * _hl_focal_length + _hl_camera_right * u * aspect_ratio + _hl_camera_up * v);
 
-	vec3 color_out = __hl_compute_color(__hl_camera_position, ray_dir);
+	vec3 color_out = _hl_compute_color(_hl_camera_position, ray_dir);
 
-	imageStore(__hl_output_image, coord, vec4(color_out, 1.0));
+	imageStore(_hl_output_image, coord, vec4(color_out, 1.0));
 }

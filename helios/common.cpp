@@ -27,8 +27,11 @@ uint32_t compile_shader(const std::string& source, shader_type type)
 	int32_t success;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 	if (!success)
+	{
+		glDeleteShader(shader);
 		return invalid_handle;
-	
+	}
+
 	return shader;
 }
 
@@ -44,7 +47,10 @@ uint32_t link_program(std::vector<uint32_t> shaders)
 	int32_t success = false;
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	if (!success)
+	{
+		glDeleteProgram(program);
 		return invalid_handle;
+	}
 
 	return program;
 }

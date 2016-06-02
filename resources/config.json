@@ -1,2 +1,30 @@
 {
+	"resolution":
+	{
+		"width": 1280,
+		"height": 720
+	},
+	"fullscreen": false,
+	"group_size":
+	{
+		"x": 32,
+		"y": 32
+	},
+	"assets":
+	{
+		"folder": "resources",
+		"copy_program":
+		{
+			"vertex_shader_filename": "base_vertex.vert",
+			"fragment_shader_filename": "copy.frag"
+		},
+		"raymarch_program":
+		{
+			"base_file": "raymarch_base.comp",
+			"library_file": "raymarch_library.comp",
+			"scene_file": "raymarch_scene.comp",
+			"main_file": "raymarch_main.comp",
+			"scene_reload_interval": 500
+		}
+	}
 }

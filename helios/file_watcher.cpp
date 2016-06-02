@@ -2,28 +2,30 @@
 #include <iostream>
 #include <chrono>
 
-file_watcher::file_watcher(fs::path path, std::chrono::milliseconds interval, callback_t callback) :
-	_path(path), _interval(interval), _callback(callback), _should_continue(false), _started(false)
+file_watcher::file_watcher(fs::path path, interval_t interval, callback_t callback) :
+	path(path), interval(interval), callback(callback),
+	_should_continue(false), _last_write_time(), _started(false)
 {
-	_last_write_time = fs::last_write_time(path);
 }
 
-void file_watcher::check()
+void file_watcher::_check()
 {
 	using hr_clock = std::chrono::high_resolution_clock;
 
+	_last_write_time = fs::last_write_time(path);
+
 	while (_should_continue)
 	{
-		auto current_write_time = fs::last_write_time(_path);
+		auto current_write_time = fs::last_write_time(path);
 		if (_last_write_time < current_write_time)
 		{
-			_callback();
+			callback();
 			_last_write_time = current_write_time;
 		}
 
 		// This is to avoid blocking the main thread during the stop() call because of the join()
 		auto sleep_starting_time = hr_clock::now();
-		while ((hr_clock::now() - sleep_starting_time) < _interval)
+		while ((hr_clock::now() - sleep_starting_time) < interval)
 		{
 			if (!_should_continue)
 				return;
@@ -37,14 +39,20 @@ void file_watcher::start()
 	if (_started)
 		return;
 
-	if (!fs::exists(_path))
+	if (path.empty())
 	{
-		std::cout << "File " << _path << " does not exists!" << std::endl;
+		std::cout << "No file set to watch for!" << std::endl;
+		return;
+	}
+
+	if (!fs::exists(path))
+	{
+		std::cout << "File " << path << " does not exists!" << std::endl;
 		return;
 	}
 
 	_should_continue = true;
-	_watcher = std::thread(&file_watcher::check, this);
+	_watcher = std::thread(&file_watcher::_check, this);
 	_started = true;
 }
 

@@ -9,9 +9,9 @@ class file_watcher
 {
 public:
 	using callback_t = std::function<void()>;
+	using interval_t = std::chrono::milliseconds;
 
-	file_watcher() = delete;
-	file_watcher(fs::path path, std::chrono::milliseconds interval, callback_t callback);
+	explicit file_watcher(fs::path path = "", interval_t interval = interval_t::max(), callback_t callback = callback_t());
 	file_watcher(const file_watcher&) = delete;
 	file_watcher(file_watcher&&) = default;
 	~file_watcher() = default;
@@ -21,13 +21,18 @@ public:
 
 	void start();
 	void stop();
-	
-private:
-	void check();
 
-	fs::path _path;
-	std::chrono::milliseconds _interval;
-	callback_t _callback;
+	/* The path of the file to look for changes */
+	fs::path path;
+
+	/* The interval between checks in milliseconds */
+	interval_t interval;
+
+	/* The callback to call when a change is detected */
+	callback_t callback;
+
+private:
+	void _check();
 
 	bool _should_continue;
 	fs::file_time_type _last_write_time;

@@ -1,36 +1,39 @@
 #version 430 core
 
-layout (binding = 0, rgba32f) writeonly uniform image2D output_image;
+layout (binding = 0, rgba32f) writeonly uniform image2D __hl_output_image;
 layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 
 // NOTE(Corralx): The GLSL specification requires at least 1024 uniform components for compute shaders
-layout(location = 1000) uniform float epsilon;
-layout(location = 1001) uniform float z_far;
-layout(location = 1002) uniform float normal_epsilon;
-layout(location = 1003) uniform float starting_step;
-layout(location = 1004) uniform int max_iterations;
+layout(location = 998)  uniform float __hl_epsilon;
+layout(location = 999)  uniform float __hl_z_far;
+layout(location = 1000) uniform float __hl_normal_epsilon;
+layout(location = 1001) uniform float __hl_starting_step;
+layout(location = 1002) uniform int   __hl_max_iterations;
 
-layout(location = 1005) uniform bool enable_shadow;
-layout(location = 1006) uniform bool soft_shadow;
-layout(location = 1007) uniform float shadow_quality;
-layout(location = 1008) uniform float shadow_epsilon;
-layout(location = 1009) uniform float shadow_starting_step;
-layout(location = 1010) uniform float shadow_max_step;
+layout(location = 1003) uniform bool  __hl_enable_shadow;
+layout(location = 1004) uniform bool  __hl_soft_shadow;
+layout(location = 1005) uniform float __hl_shadow_quality;
+layout(location = 1006) uniform float __hl_shadow_epsilon;
+layout(location = 1007) uniform float __hl_shadow_starting_step;
+layout(location = 1008) uniform float __hl_shadow_max_step;
 
-layout(location = 1011) uniform bool enable_ambient_occlusion;
-layout(location = 1012) uniform float ambient_occlusion_step;
-layout(location = 1013) uniform int ambient_occlusion_iterations;
+layout(location = 1009) uniform bool  __hl_enable_ambient_occlusion;
+layout(location = 1010) uniform float __hl_ambient_occlusion_step;
+layout(location = 1011) uniform int   __hl_ambient_occlusion_iterations;
 
-layout(location = 1014) uniform float time;
+layout(location = 1012) uniform float time;
 
-layout(location = 1015) uniform vec3 light_direction;
-layout(location = 1016) uniform vec3 light_color;
+layout(location = 1013) uniform float __hl_floor_height;
+layout(location = 1014) uniform vec3  __hl_sky_color;
 
-layout(location = 1017) uniform vec3 camera_position;
-layout(location = 1018) uniform vec3 camera_view;
-layout(location = 1019) uniform vec3 camera_up;
-layout(location = 1020) uniform vec3 camera_right;
-layout(location = 1021) uniform float focal_length;
+layout(location = 1015) uniform vec3  __hl_light_direction;
+layout(location = 1016) uniform vec3  __hl_light_color;
 
-layout(location = 1022) uniform uint screen_width;
-layout(location = 1023) uniform uint screen_height;
+layout(location = 1017) uniform vec3  __hl_camera_position;
+layout(location = 1018) uniform vec3  __hl_camera_view;
+layout(location = 1019) uniform vec3  __hl_camera_up;
+layout(location = 1020) uniform vec3  __hl_camera_right;
+layout(location = 1021) uniform float __hl_focal_length;
+
+layout(location = 1022) uniform uint  screen_width;
+layout(location = 1023) uniform uint  screen_height;

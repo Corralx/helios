@@ -8,7 +8,10 @@ set (CONFIG_FILE "${RESOURCES_DIR}/config.json")
 set (
 	SRC
 	main.cpp
+	application.cpp
+	configuration.cpp
 	common.cpp
+	uniform_utils.cpp
 	file_watcher.cpp
 	imgui_sdl_bridge.cpp
 )
@@ -16,6 +19,10 @@ set (
 set (
 	HEADER
 	common.hpp
+	application.hpp
+	uniforms_locations.hpp
+	configuration.hpp
+	uniform_utils.hpp
 	file_watcher.hpp
 	imgui_sdl_bridge.hpp
 )
@@ -82,7 +89,7 @@ set (
 	$<$<PLATFORM_ID:Windows>:opengl32>
 )
 
-add_definitions (-DNOMINMAX)
+add_definitions (-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
 
 target_link_libraries (
 	helios

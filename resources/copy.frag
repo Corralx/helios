@@ -2,10 +2,10 @@
 
 layout(location = 0) out vec4 color_out;
 
-layout(location = 0) uniform uint screen_width;
-layout(location = 1) uniform uint screen_height;
-layout(location = 2) uniform float vignette_radius;
-layout(location = 3) uniform float vignette_smoothness;
+layout(location = 1022) uniform uint screen_width;
+layout(location = 1023) uniform uint screen_height;
+layout(location = 1020) uniform float vignette_radius;
+layout(location = 1021) uniform float vignette_smoothness;
 
 layout(binding = 0) uniform sampler2D source_image;
 

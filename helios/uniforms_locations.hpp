@@ -1,7 +1,5 @@
 #pragma once
 
-// TODO(Corralx): Hide the symbols behind a namespace to avoid pollution maybe?
-
 #include <cstdint>
 
 // NOTE(Corralx): We are using a custom namespace to hide the names and avoid pollution

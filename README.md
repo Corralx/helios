@@ -13,6 +13,8 @@ The **g** key can be used at any time to show or hide the GUI.
 * Live editing of the scene file through hot reloading of GLSL code
 * Parse of GLSL source to expose user-declared uniforms on the GUI automatically
 
+**NOTE:** This is still an early release and a lot of things may break. Any issue/problem report is more than welcome!
+
 ### References
 
 * https://graphics.cs.illinois.edu/sites/default/files/zeno.pdf

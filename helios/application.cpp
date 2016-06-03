@@ -27,8 +27,9 @@ static constexpr char* WINDOW_NAME = "Helios";
 
 application::application() : _config(), _window(nullptr), _render_context(nullptr), _compiler_context(nullptr),
 	_fullscreen_quad(invalid_handle), _offscreen_buffer(invalid_handle), _raymarch_program(invalid_handle),
-	_copy_program(invalid_handle), _uniforms(), _should_run(false), _initialized(false), _raymarch_watcher(),
-	_temp_program(invalid_handle), _swap_program(false), _raymarch(), _camera(), _light(), _scene(), _postprocess()
+	_copy_program(invalid_handle), _uniforms(), _should_run(false), _initialized(false), _render_gui(true),
+	_raymarch_watcher(), _temp_program(invalid_handle), _swap_program(false), _raymarch(), _camera(), _light(),
+	_scene(), _postprocess()
 {
 	// NOTE(Corralx): Nothing to do, everything is postponed to init()
 }
@@ -143,10 +144,13 @@ void application::run()
 		copy_to_framebuffer();
 
 		/* Generate the GUI */
-		imgui_new_frame();
-		generate_gui();
-		ImGui::Render();
-		
+		if (_render_gui)
+		{
+			imgui_new_frame();
+			generate_gui();
+			ImGui::Render();
+		}
+
 		/* Swap buffers */
 		SDL_GL_SwapWindow(_window);
 	}
@@ -298,6 +302,8 @@ void application::process_messages()
 			case SDL_KEYDOWN:
 				if (event.key.keysym.sym == SDLK_ESCAPE)
 					_should_run = false;
+				else if (event.key.keysym.sym == SDLK_g)
+					_render_gui = !_render_gui;
 				break;
 
 			default:

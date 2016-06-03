@@ -83,10 +83,25 @@ add_executable (
 	${CONFIG_FILE}
 )
 
+# No support for OS X because neither Apple nor Nvidia support OpenGL 4.3 in their implementation
 set (
 	OPENGL_LIB
 	gl3w
 	$<$<PLATFORM_ID:Windows>:opengl32>
+	$<$<PLATFORM_ID:Linux>:GL>
+)
+
+# GCC implements the filesystem TR in a separate library
+set (
+	FILESYSTEM_LIB
+	$<$<CXX_COMPILER_ID:GCC>:stdc++fs>
+)
+
+set (
+	SDL2_LIB
+	$<$<PLATFORM_ID:Windows>:${SDL2_LIB_PATH}/SDL2.lib>
+	$<$<PLATFORM_ID:Windows>:${SDL2_LIB_PATH}/SDL2main.lib>
+	$<$<PLATFORM_ID:Linux>:${SDL2_LIB_PATH}/SDL2.a>
 )
 
 add_definitions (-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
@@ -100,8 +115,8 @@ target_link_libraries (
 	OSDependent
 	glslang
 	${OPENGL_LIB}
-	${SDL2_LIB_PATH}/SDL2.lib
-	${SDL2_LIB_PATH}/SDL2main.lib
+	${FILESYSTEM_LIB}
+	${SDL2_LIB}
 )
 
 set (MSVC_OPTIONS /MP)

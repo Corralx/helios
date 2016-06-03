@@ -41,6 +41,7 @@ private:
 
 	bool _should_run;
 	bool _initialized;
+	bool _render_gui;
 	
 	file_watcher _raymarch_watcher;
 	uint32_t _temp_program;

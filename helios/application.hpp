@@ -4,7 +4,7 @@
 #include "file_watcher.hpp"
 #include "uniform_utils.hpp"
 
-#include "SDL2/SDL.h"
+#include "SDL.h"
 
 #include <cstdint>
 #include <chrono>

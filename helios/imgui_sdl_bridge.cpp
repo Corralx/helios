@@ -7,8 +7,8 @@
 #include "imgui/imgui.h"
 #include "imgui_sdl_bridge.hpp"
 
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_syswm.h"
+#include "SDL.h"
+#include "SDL_syswm.h"
 #include "GL/gl3w.h"
 
 static SDL_Window*  g_Window = nullptr;

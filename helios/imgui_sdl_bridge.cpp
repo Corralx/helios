@@ -4,12 +4,22 @@
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 // https://github.com/ocornut/imgui
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
 #include "imgui/imgui.h"
 #include "imgui_sdl_bridge.hpp"
+
 
 #include "SDL.h"
 #include "SDL_syswm.h"
 #include "GL/gl3w.h"
+
 
 static SDL_Window*  g_Window = nullptr;
 static double       g_Time = 0.0f;
@@ -374,3 +384,4 @@ void imgui_new_frame()
     // Start the frame
     ImGui::NewFrame();
 }
+#pragma clang diagnostic pop

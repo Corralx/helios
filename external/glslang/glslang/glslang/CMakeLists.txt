@@ -73,15 +73,15 @@ set(HEADERS
 add_library(glslang STATIC ${SRC} ${HEADERS})
 
 target_compile_options (
-  glslang PUBLIC
-  "$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fPIC -std=c++11>"
-  "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+  glslang PRIVATE
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-std=c++11 -fvisibility=default>
+  $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )
 
 target_compile_definitions (
 	glslang PUBLIC
-	"$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:GLSLANG_OSINCLUDE_UNIX>"
-	"$<$<CXX_COMPILER_ID:MSVC>:GLSLANG_OSINCLUDE_WIN32>"
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:GLSLANG_OSINCLUDE_UNIX>
+	$<$<CXX_COMPILER_ID:MSVC>:GLSLANG_OSINCLUDE_WIN32>
 )
 
 set_property (TARGET glslang PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")

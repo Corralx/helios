@@ -22,8 +22,10 @@ set(HEADERS
 add_library(HLSL STATIC ${SRC} ${HEADERS})
 
 target_compile_options (
-  HLSL PUBLIC
-  "$<$<CXX_COMPILER_ID:MSVC>:/MP>"
+  HLSL PRIVATE
+  $<$<CXX_COMPILER_ID:GNU>:-std=c++11 -fvisibility=default>
+  $<$<CXX_COMPILER_ID:Clang>:-std=c++11 -fvisibility=default>
+  $<$<CXX_COMPILER_ID:MSVC>:/MP>
 )
 
 set_property (TARGET HLSL PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")

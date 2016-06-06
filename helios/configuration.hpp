@@ -1,11 +1,7 @@
 #pragma once
 
 #include <cstdint>
-
-#include <chrono>
-using namespace std::literals::chrono_literals;
-#include <experimental/filesystem>
-namespace fs { using namespace std::experimental::filesystem::v1; }
+#include "common.hpp"
 
 // NOTE(Corralx): Default values are used if no config file is found or the key is not defined
 struct config_t

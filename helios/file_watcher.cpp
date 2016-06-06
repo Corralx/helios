@@ -2,8 +2,8 @@
 #include <iostream>
 #include <chrono>
 
-file_watcher::file_watcher(fs::path path, interval_t interval, callback_t callback) :
-	path(path), interval(interval), callback(callback),
+file_watcher::file_watcher(fs::path _path, interval_t _interval, callback_t _callback) :
+	path(_path), interval(_interval), callback(_callback),
 	_should_continue(false), _last_write_time(), _started(false)
 {
 }

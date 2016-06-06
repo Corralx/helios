@@ -4,7 +4,6 @@
 #include <iostream>
 #include <cassert>
 #include <chrono>
-using namespace std::literals::chrono_literals;
 using hr_clock = std::chrono::high_resolution_clock;
 #include <ctime>
 #include <iomanip>
@@ -16,14 +15,21 @@ using hr_clock = std::chrono::high_resolution_clock;
 #include <unistd.h>
 #endif
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wsign-conversion"
 #include "imgui/imgui.h"
 #include "imgui_sdl_bridge.hpp"
+
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#pragma clang diagnostic pop
 
 static constexpr uint32_t OPENGL_MAJOR_VERSION = 4;
 static constexpr uint32_t OPENGL_MINOR_VERSION = 3;
-static constexpr char* WINDOW_NAME = "Helios";
+static constexpr const char* WINDOW_NAME = "Helios";
 
 application::application() : _config(), _window(nullptr), _render_context(nullptr), _compiler_context(nullptr),
 	_fullscreen_quad(invalid_handle), _offscreen_buffer(invalid_handle), _raymarch_program(invalid_handle),
@@ -185,9 +191,11 @@ bool application::open_window()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 #endif
 
-	auto fullscreen_flag = _config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
-	_window = SDL_CreateWindow(WINDOW_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _config.resolution.width,
-							   _config.resolution.height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen_flag);
+	uint32_t fullscreen_flag = _config.fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+	_window = SDL_CreateWindow(WINDOW_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                               static_cast<int32_t> (_config.resolution.width),
+                               static_cast<int32_t> (_config.resolution.height),
+							   SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen_flag);
 
 	if (!_window)
 	{
@@ -245,8 +253,10 @@ bool application::create_opengl_resources()
 	glBindTexture(GL_TEXTURE_2D, _offscreen_buffer);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, _config.resolution.width,
-				 _config.resolution.height, 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F,
+                 static_cast<int32_t> (_config.resolution.width),
+				 static_cast<int32_t> (_config.resolution.height),
+                 0, GL_RGBA, GL_FLOAT, nullptr);
 	glBindImageTexture(0, _offscreen_buffer, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
 	/* Raymarch program */
@@ -465,7 +475,7 @@ void application::open_scene_file()
 	auto pid = fork();
 	if (pid == 0)
 	{
-		execl("/usr/bin/xdg-open", "xdg-open", scene_path.c_str(), (char *)0);
+		execl("/usr/bin/xdg-open", "xdg-open", scene_path.c_str(), static_cast<char *> (0));
 		exit(1);
 	}
 #endif
@@ -514,7 +524,7 @@ void application::bind_user_uniforms()
 {
 	for (const auto& u : _uniforms)
 	{
-		if (u.location == invalid_handle)
+		if (u.location == invalid_location)
 			continue;
 
 		switch (u.type)
@@ -593,6 +603,7 @@ void application::bind_user_uniforms()
 							 static_cast<uint32_t>(u.ivec4.y),
 							 static_cast<uint32_t>(u.ivec4.z),
 							 static_cast<uint32_t>(u.ivec4.w));
+                break;
 
 			case uniform_type::BOOL:
 				glUniform1ui(u.location, static_cast<uint32_t>(u.boolean));

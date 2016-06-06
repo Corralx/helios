@@ -3,12 +3,7 @@
 #include "configuration.hpp"
 #include "file_watcher.hpp"
 #include "uniform_utils.hpp"
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
-#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
-#include "SDL.h"
-#pragma clang diagnostic pop
+#include "common.hpp"
 
 #include <cstdint>
 #include <chrono>

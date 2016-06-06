@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.0.2)
 
 project (helios)
 
+# We use different paths for libraries and headers because the paths differs if you build SDL from sources
 set (SDL2_INCLUDE_PATH "" CACHE PATH "SDL2 include path")
 set (SDL2_LIB_PATH "" CACHE PATH "SDL2 library path")
 

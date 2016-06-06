@@ -2,12 +2,6 @@
 
 #include "common.hpp"
 #include "uniforms_locations.hpp"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
-#pragma clang diagnostic ignored "-Wundef"
-#include "glm/glm.hpp"
-#pragma clang diagnostic pop
 
 #include <cstdint>
 #include <vector>

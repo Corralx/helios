@@ -1,15 +1,42 @@
 #pragma once
 
 #include <chrono>
+using namespace std::literals::chrono_literals;
 #include <cstdint>
 #include <limits>
 #include <vector>
 #include <experimental/filesystem>
-
-#include "GL/gl3w.h"
-
 namespace fs { using namespace std::experimental::filesystem::v1; }
-using namespace std::literals::chrono_literals;
+
+/* NOTE(Corralx): The following section is used as a unified place to include
+ * some dependencies which triggers a lot of warning on some compilers (especially Clang).
+ * This avoid duplicates of the pragma directives to disable them.
+ */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
+#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
+#pragma clang diagnostic ignored "-Wundef"
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#include "SDL.h"
+#include "SDL_syswm.h"
+#include "imgui/imgui.h"
+#include "imgui_sdl_bridge.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "ShaderLang.h"
+#include "GL/gl3w.h"
+#pragma clang diagnostic pop
+
+#pragma warning(push, 0)
+#include "rapidjson/document.h"
+#pragma warning(pop)
+/* --------------------------------------------------------------------------- */
 
 std::string get_content_of_file(const fs::path& path);
 

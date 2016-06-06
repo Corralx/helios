@@ -2,9 +2,6 @@
 #include "common.hpp"
 
 #include <iostream>
-#pragma warning(push, 0)
-#include "rapidjson/document.h"
-#pragma warning(pop)
 
 // Hardcoded configuration path
 static constexpr const char* CONFIG_PATH = "resources/config.json";

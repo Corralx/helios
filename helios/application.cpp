@@ -15,18 +15,6 @@ using hr_clock = std::chrono::high_resolution_clock;
 #include <unistd.h>
 #endif
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#pragma clang diagnostic ignored "-Wfloat-equal"
-#pragma clang diagnostic ignored "-Wshadow"
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#include "imgui/imgui.h"
-#include "imgui_sdl_bridge.hpp"
-
-#include "glm/glm.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#pragma clang diagnostic pop
-
 static constexpr uint32_t OPENGL_MAJOR_VERSION = 4;
 static constexpr uint32_t OPENGL_MINOR_VERSION = 3;
 static constexpr const char* WINDOW_NAME = "Helios";

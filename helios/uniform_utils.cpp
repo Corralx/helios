@@ -5,17 +5,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "GL/gl3w.h"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wshadow"
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-#pragma clang diagnostic ignored "-Wswitch-enum"
-#pragma clang diagnostic ignored "-Wweak-vtables"
-#include "glm/gtc/type_ptr.hpp"
-
-#include "ShaderLang.h"
-#pragma clang diagnostic pop
+#include "common.hpp"
 
 /* TODO(Corralx): Find a better way to declare these, instead of hardcoding them.
    Ideally we would like to use the declared location through the layout(...) syntax,

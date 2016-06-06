@@ -135,7 +135,7 @@ target_compile_options (
 )
 
 set (CLANG_WARNINGS -Weverything -Werror -pedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-unknown-pragmas -Wno-header-hygiene -Wno-reserved-id-macro -Wno-documentation -Wno-padded -Wno-double-promotion -Wno-covered-switch-default -Wno-exit-time-destructors -Wno-global-constructors)
-set (MSVC_WARNINGS /wd4068 /wd4201 /W4 /WX)
+set (MSVC_WARNINGS /wd4068 /wd4201 /W4 /WX /INCREMENTAL:NO)
 set (GNU_WARNINGS -Wall -Wextra -pedantic -Werror -Wno-pragmas -Wno-unknown-pragmas)
 
 target_compile_options (
@@ -143,7 +143,6 @@ target_compile_options (
   $<$<CXX_COMPILER_ID:MSVC>:${MSVC_WARNINGS}>
   $<$<CXX_COMPILER_ID:GNU>:${GNU_WARNINGS}>
   $<$<CXX_COMPILER_ID:Clang>:${CLANG_WARNINGS}>
-
 )
 
 set_property (TARGET helios PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")

@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.0.2)
 
 project (helios CXX)
 
+find_package(Threads REQUIRED)
+
 set (RESOURCES_DIR "${CMAKE_SOURCE_DIR}/resources")
 set (CONFIG_FILE "${RESOURCES_DIR}/config.json")
 
@@ -94,14 +96,15 @@ set (
 # GCC implements the filesystem TR in a separate library
 set (
 	FILESYSTEM_LIB
-	$<$<CXX_COMPILER_ID:GCC>:stdc++fs>
+	$<$<CXX_COMPILER_ID:GNU>:stdc++fs>
+	$<$<CXX_COMPILER_ID:Clang>:stdc++fs>
 )
 
 set (
 	SDL2_LIB
 	$<$<PLATFORM_ID:Windows>:${SDL2_LIB_PATH}/SDL2.lib>
 	$<$<PLATFORM_ID:Windows>:${SDL2_LIB_PATH}/SDL2main.lib>
-	$<$<PLATFORM_ID:Linux>:${SDL2_LIB_PATH}/SDL2.a>
+	$<$<PLATFORM_ID:Linux>:${SDL2_LIB_PATH}/libSDL2.so>
 )
 
 add_definitions (-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS)
@@ -110,38 +113,38 @@ target_link_libraries (
 	helios
 	cppformat
 	imgui
+	glslang
+	OSDependent
 	HLSL
 	OGLCompiler
-	OSDependent
-	glslang
 	${OPENGL_LIB}
 	${FILESYSTEM_LIB}
 	${SDL2_LIB}
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 
-set (MSVC_OPTIONS /MP)
-set (GNU_OPTIONS -std=c++11)
-set (CLANG_OPTIONS -std=c++11)
+set (MSVC_OPTIONS /MP /INCREMENTAL:NO)
+set (GNU_OPTIONS -std=c++14 -fext-numeric-literals)
+set (CLANG_OPTIONS -std=c++14 )
 
 target_compile_options (
   helios PUBLIC
-  "$<$<CXX_COMPILER_ID:MSVC>:${MSVC_OPTIONS}>"
-  "$<$<CXX_COMPILER_ID:GNU>:${GNU_OPTIONS}>"
-  "$<$<CXX_COMPILER_ID:Clang>:${CLANG_OPTIONS}>"
+  $<$<CXX_COMPILER_ID:MSVC>:${MSVC_OPTIONS}>
+  $<$<CXX_COMPILER_ID:GNU>:${GNU_OPTIONS}>
+  $<$<CXX_COMPILER_ID:Clang>:${CLANG_OPTIONS}>
 )
 
-set (CLANG_WARNINGS -Weverything -pedantic -Werror -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-unknown-pragmas)
+set (CLANG_WARNINGS -Weverything -Werror -pedantic -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-unknown-pragmas -Wno-header-hygiene -Wno-reserved-id-macro -Wno-documentation -Wno-padded -Wno-double-promotion -Wno-covered-switch-default -Wno-exit-time-destructors -Wno-global-constructors)
 set (MSVC_WARNINGS /wd4068 /wd4201 /W4 /WX)
 set (GNU_WARNINGS -Wall -Wextra -pedantic -Werror -Wno-pragmas -Wno-unknown-pragmas)
 
 target_compile_options (
-  helios PUBLIC 
-  "$<$<CXX_COMPILER_ID:MSVC>:${MSVC_WARNINGS}>"
-  "$<$<CXX_COMPILER_ID:GNU>:${GNU_WARNINGS}>"
-  "$<$<CXX_COMPILER_ID:Clang>:${CLANG_WARNINGS}>"
-)
+  helios PUBLIC
+  $<$<CXX_COMPILER_ID:MSVC>:${MSVC_WARNINGS}>
+  $<$<CXX_COMPILER_ID:GNU>:${GNU_WARNINGS}>
+  $<$<CXX_COMPILER_ID:Clang>:${CLANG_WARNINGS}>
 
-set_property (TARGET helios PROPERTY LINK_FLAGS "/INCREMENTAL:NO")
+)
 
 set_property (TARGET helios PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set_property (TARGET helios PROPERTY PDB_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")

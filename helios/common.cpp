@@ -13,7 +13,7 @@ std::string get_content_of_file(const fs::path& path)
 	std::string content(std::istreambuf_iterator<char>(stream),
 						(std::istreambuf_iterator<char>()));
 
-	return std::move(content);
+	return content;
 }
 
 uint32_t compile_shader(const std::string& source, shader_type type)

@@ -7,26 +7,26 @@
 #pragma warning(pop)
 
 // Hardcoded configuration path
-static constexpr char* CONFIG_PATH = "resources/config.json";
+static constexpr const char* CONFIG_PATH = "resources/config.json";
 
-static constexpr char* RESOLUTION_KEY = "resolution";
-static constexpr char* WIDTH_KEY = "width";
-static constexpr char* HEIGHT_KEY = "height";
-static constexpr char* FULLSCREEN_KEY = "fullscreen";
-static constexpr char* GROUP_SIZE_KEY = "group_size";
-static constexpr char* X_KEY = "x";
-static constexpr char* Y_KEY = "y";
-static constexpr char* ASSETS_KEY = "assets";
-static constexpr char* FOLDER_KEY = "folder";
-static constexpr char* COPY_PROGRAM_KEY = "copy_program";
-static constexpr char* VERTEX_SHADER_FILENAME_KEY = "vertex_shader_filename";
-static constexpr char* FRAGMENT_SHADER_FILENAME_KEY = "fragment_shader_filename";
-static constexpr char* RAYMARCH_PROGRAM_KEY = "raymarch_program";
-static constexpr char* BASE_FILE_KEY = "base_file";
-static constexpr char* LIBRARY_FILE_KEY = "library_file";
-static constexpr char* SCENE_FILE_KEY = "scene_file";
-static constexpr char* MAIN_FILE_KEY = "main_file";
-static constexpr char* SCENE_RELOAD_INTERVAL = "scene_reload_interval";
+static constexpr const char* RESOLUTION_KEY = "resolution";
+static constexpr const char* WIDTH_KEY = "width";
+static constexpr const char* HEIGHT_KEY = "height";
+static constexpr const char* FULLSCREEN_KEY = "fullscreen";
+static constexpr const char* GROUP_SIZE_KEY = "group_size";
+static constexpr const char* X_KEY = "x";
+static constexpr const char* Y_KEY = "y";
+static constexpr const char* ASSETS_KEY = "assets";
+static constexpr const char* FOLDER_KEY = "folder";
+static constexpr const char* COPY_PROGRAM_KEY = "copy_program";
+static constexpr const char* VERTEX_SHADER_FILENAME_KEY = "vertex_shader_filename";
+static constexpr const char* FRAGMENT_SHADER_FILENAME_KEY = "fragment_shader_filename";
+static constexpr const char* RAYMARCH_PROGRAM_KEY = "raymarch_program";
+static constexpr const char* BASE_FILE_KEY = "base_file";
+static constexpr const char* LIBRARY_FILE_KEY = "library_file";
+static constexpr const char* SCENE_FILE_KEY = "scene_file";
+static constexpr const char* MAIN_FILE_KEY = "main_file";
+static constexpr const char* SCENE_RELOAD_INTERVAL = "scene_reload_interval";
 
 #define LOAD_BOOL_IF(member, doc, key) \
 if (doc.HasMember(key)) \

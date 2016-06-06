@@ -2,8 +2,12 @@
 
 #include "common.hpp"
 #include "uniforms_locations.hpp"
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
+#pragma clang diagnostic ignored "-Wundef"
 #include "glm/glm.hpp"
+#pragma clang diagnostic pop
 
 #include <cstdint>
 #include <vector>
@@ -91,10 +95,10 @@ enum class uniform_type : uint8_t
 struct uniform_t
 {
 	uniform_t(const std::string& n, uniform_type t) :
-		name(n), location(invalid_handle), type(t), ivec4(0) {}
+		name(n), location(invalid_location), type(t), ivec4(0) {}
 
 	std::string name;
-	uint32_t location;
+	int32_t location;
 	uniform_type type;
 
 	// NOTE(Corralx): ImGui does not support doubles or unsigned ints

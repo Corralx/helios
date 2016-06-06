@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <limits>
 #include <vector>
@@ -8,7 +9,7 @@
 #include "GL/gl3w.h"
 
 namespace fs { using namespace std::experimental::filesystem::v1; }
-using namespace std::chrono_literals;
+using namespace std::literals::chrono_literals;
 
 std::string get_content_of_file(const fs::path& path);
 
@@ -21,6 +22,7 @@ enum class shader_type : uint32_t
 };
 
 static constexpr uint32_t invalid_handle = std::numeric_limits<uint32_t>::max();
+static constexpr int32_t invalid_location = std::numeric_limits<int32_t>::max();
 
 // NOTE(Corralx): An active GL context is required on the calling thread for these to work
 uint32_t compile_shader(const std::string& source, shader_type type);

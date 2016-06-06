@@ -6,8 +6,16 @@
 #include <iostream>
 
 #include "GL/gl3w.h"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wnon-virtual-dtor"
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#pragma clang diagnostic ignored "-Wweak-vtables"
 #include "glm/gtc/type_ptr.hpp"
+
 #include "ShaderLang.h"
+#pragma clang diagnostic pop
 
 /* TODO(Corralx): Find a better way to declare these, instead of hardcoding them.
    Ideally we would like to use the declared location through the layout(...) syntax,
@@ -133,7 +141,7 @@ std::vector<uniform_t> extract_uniform(const std::string& source)
 		uniforms.emplace_back(name, it_type->second);
 	}
 
-	return std::move(uniforms);
+	return uniforms;
 }
 
 void copy_uniforms_value(std::vector<uniform_t>& old_uniforms, std::vector<uniform_t>& new_uniforms)
@@ -189,10 +197,10 @@ void get_uniforms_locations(std::vector<uniform_t>& uniforms, uint32_t program)
 {
 	for (auto& u : uniforms)
 	{
-		uint32_t loc = glGetUniformLocation(program, u.name.c_str());
+		int32_t loc = glGetUniformLocation(program, u.name.c_str());
 
 		// NOTE(Corralx): This should not happen because glslang optimize away the unused uniforms too
-		if (loc == invalid_handle)
+		if (loc == invalid_location)
 			std::cout << "Could not retrieve location for uniform \"" << u.name
 			<< "\" (Maybe it was optimized away?)" << std::endl;
 

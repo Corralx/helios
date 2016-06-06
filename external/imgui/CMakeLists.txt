@@ -24,8 +24,8 @@ include_directories (include/imgui)
 include_directories (src)
 
 target_compile_options (
-  imgui PUBLIC
-  "$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-std=c++11>"
+  imgui PRIVATE
+  $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-std=c++11>
 )
 
 set_property (TARGET imgui PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")

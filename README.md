@@ -13,6 +13,8 @@ Helios is an implicit surface renderer based on the common [Sphere Tracing](http
 
 **NOTE:** This is still an early release and a lot of things may break. Any issue/problem report is more than welcome!
 
+![image](http://corralx.me/public/projects/helios.preview.jpg "Helios")
+
 ### Usage
 
 The **g** key can be used at any time to show or hide the GUI.

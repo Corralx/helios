@@ -18,12 +18,14 @@ Helios is an implicit surface renderer based on the common [Sphere Tracing](http
 The **g** key can be used at any time to show or hide the GUI.
 The algorithm and scene parameters can be tweaked there.
 
-In the resources folder there are 3 file that might be of interest:
+In the resources folder there are 3 files that might be of interest:
 * **config.json** where some parameters might be adjusted, like the resolution or the fullscreen mode
-* **raymarch_library.comp** which contains several utility and distance functions
+* **raymarch_library.comp** which contains several utilities and distance functions
 * **raymarch_scene.comp** which contains the definition of the **scene** function that is called by the raymarch algorithm to evaluate the distance field
 
-A separate library file is provided to let the user easily switch between different libraries (like using the one provided by the [mercury demogroup](http://mercury.sexy/hg_sdf/)).
+A separate library file is provided to let the user easily switch between different libraries (like using the one provided by the awesome [mercury demogroup](http://mercury.sexy/hg_sdf/)).
+
+**NOTE:** For the **Open Scene File** button on the GUI to work, you need to have a default program association set up in your desktop environment for the **.comp** extension!
 
 ### References
 

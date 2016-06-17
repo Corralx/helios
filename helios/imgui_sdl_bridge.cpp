@@ -7,6 +7,11 @@
 #include "common.hpp"
 
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wmissing-prototypes"
+
 static SDL_Window*  g_Window = nullptr;
 static double       g_Time = 0.0f;
 static bool         g_MousePressed[3] = { false, false, false };
@@ -370,3 +375,5 @@ void imgui_new_frame()
     // Start the frame
     ImGui::NewFrame();
 }
+
+#pragma clang diagnostic pop

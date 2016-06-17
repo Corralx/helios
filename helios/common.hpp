@@ -12,6 +12,10 @@ namespace fs { using namespace std::experimental::filesystem::v1; }
  * some dependencies which triggers a lot of warning on some compilers (especially Clang).
  * This avoid duplicates of the pragma directives to disable them.
  */
+#pragma warning(push, 0)
+#include "rapidjson/document.h"
+#pragma warning(pop)
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wimplicit-fallthrough"
 #pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
@@ -19,6 +23,8 @@ namespace fs { using namespace std::experimental::filesystem::v1; }
 #pragma clang diagnostic ignored "-Wundefined-reinterpret-cast"
 #pragma clang diagnostic ignored "-Wundef"
 #pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#pragma clang diagnostic ignored "-Wold-style-cast"
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic ignored "-Wswitch-enum"
@@ -33,9 +39,6 @@ namespace fs { using namespace std::experimental::filesystem::v1; }
 #include "GL/gl3w.h"
 #pragma clang diagnostic pop
 
-#pragma warning(push, 0)
-#include "rapidjson/document.h"
-#pragma warning(pop)
 /* --------------------------------------------------------------------------- */
 
 std::string get_content_of_file(const fs::path& path);

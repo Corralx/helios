@@ -1,8 +1,15 @@
 #include "application.hpp"
 
-// TODO(Corralx): Add a way to hide the console
+#if defined WIN32 && defined NDEBUG
+#include <wincon.h> 
+#endif
+
 int main(int, char*[])
 {
+#if defined WIN32 && defined NDEBUG
+	ShowWindow(GetConsoleWindow(), SW_HIDE);
+#endif
+
 	application app;
 	if (!app.init())
 		return -1;

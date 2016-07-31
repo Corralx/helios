@@ -325,7 +325,6 @@ void application::swap_raymarch_program()
 	_swap_program = false;
 }
 
-// TODO(Corralx): We should really be using an UBO for all of these instead of doing 25+ glUniform* calls
 void application::raymarch()
 {
 	glUseProgram(_raymarch_program);
@@ -470,6 +469,7 @@ void application::open_scene_file()
 #endif
 }
 
+// TODO(Corralx): We should really be using an UBO for all of these instead of doing 25+ glUniform* calls
 void application::bind_default_uniforms()
 {
 	using namespace locations;

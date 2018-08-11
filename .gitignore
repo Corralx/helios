@@ -1,3 +1,7 @@
+# Configuration files
+*.user
+*.ini
+
 # Compiled Object files
 *.slo
 *.lo

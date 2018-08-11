@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <cctype>
 
 struct raymarch_t
 {
@@ -89,9 +90,35 @@ enum class uniform_type : uint8_t
 struct uniform_t
 {
 	uniform_t(const std::string& n, uniform_type t) :
-		name(n), location(invalid_location), type(t), ivec4(0) {}
+		name(n), readable_name(""), location(invalid_location), type(t), ivec4(0)
+	{
+		std::string temp = n;
+
+		// Uppercase everything after a '_'
+		for (size_t i = 1; i < temp.size(); ++i)
+			if (temp[i - 1] == '_')
+				temp[i] = static_cast<char>(std::toupper(temp[i]));
+
+		// Add spaces before every uppercase char
+		readable_name.reserve(temp.size());
+		temp[0] = static_cast<char>(std::tolower(temp[0]));
+
+		for (char c : temp)
+		{
+			if (c == '_')
+				continue;
+
+			if (std::isupper(c))
+				readable_name.push_back(' ');
+			readable_name.push_back(c);
+		}
+
+		// Uppercase the first char
+		readable_name[0] = static_cast<char>(std::toupper(readable_name[0]));
+	}
 
 	std::string name;
+	std::string readable_name;
 	int32_t location;
 	uniform_type type;
 

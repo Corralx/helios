@@ -35,6 +35,7 @@ bool application::init()
 
 	_config = load_config();
 
+	// NOTE(Corralx): If something fails, everything else after will fail too, but that's not a problem
 	bool ret = open_window();
 	assert(ret);
 
@@ -324,7 +325,6 @@ void application::swap_raymarch_program()
 	_swap_program = false;
 }
 
-// TODO(Corralx): We should really be using an UBO for all of these instead of doing 25+ glUniform* calls
 void application::raymarch()
 {
 	glUseProgram(_raymarch_program);
@@ -469,6 +469,7 @@ void application::open_scene_file()
 #endif
 }
 
+// TODO(Corralx): We should really be using an UBO for all of these instead of doing 25+ glUniform* calls
 void application::bind_default_uniforms()
 {
 	using namespace locations;
@@ -615,46 +616,46 @@ void application::generate_gui_for_user_uniforms()
 		{
 			case uniform_type::FLOAT:
 			case uniform_type::DOUBLE:
-				ImGui::InputFloat(u.name.c_str(), glm::value_ptr<float>(u.vec4));
+				ImGui::InputFloat(u.readable_name.c_str(), glm::value_ptr<float>(u.vec4));
 				break;
 
 			case uniform_type::VEC2:
 			case uniform_type::DVEC2:
-				ImGui::InputFloat2(u.name.c_str(), glm::value_ptr<float>(u.vec4));
+				ImGui::InputFloat2(u.readable_name.c_str(), glm::value_ptr<float>(u.vec4));
 				break;
 
 			case uniform_type::VEC3:
 			case uniform_type::DVEC3:
-				ImGui::InputFloat3(u.name.c_str(), glm::value_ptr<float>(u.vec4));
+				ImGui::InputFloat3(u.readable_name.c_str(), glm::value_ptr<float>(u.vec4));
 				break;
 
 			case uniform_type::VEC4:
 			case uniform_type::DVEC4:
-				ImGui::InputFloat4(u.name.c_str(), glm::value_ptr<float>(u.vec4));
+				ImGui::InputFloat4(u.readable_name.c_str(), glm::value_ptr<float>(u.vec4));
 				break;
 
 			case uniform_type::INT:
 			case uniform_type::UINT:
-				ImGui::InputInt(u.name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
+				ImGui::InputInt(u.readable_name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
 				break;
 
 			case uniform_type::IVEC2:
 			case uniform_type::UVEC2:
-				ImGui::InputInt2(u.name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
+				ImGui::InputInt2(u.readable_name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
 				break;
 
 			case uniform_type::IVEC3:
 			case uniform_type::UVEC3:
-				ImGui::InputInt3(u.name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
+				ImGui::InputInt3(u.readable_name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
 				break;
 
 			case uniform_type::IVEC4:
 			case uniform_type::UVEC4:
-				ImGui::InputInt4(u.name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
+				ImGui::InputInt4(u.readable_name.c_str(), glm::value_ptr<int32_t>(u.ivec4));
 				break;
 
 			case uniform_type::BOOL:
-				ImGui::Checkbox(u.name.c_str(), &u.boolean);
+				ImGui::Checkbox(u.readable_name.c_str(), &u.boolean);
 				break;
 
 			default:
